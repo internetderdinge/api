@@ -1,6 +1,6 @@
 {
   "name": "@internetderdinge/api",
-  "version": "1.224.2",
+  "version": "1.224.3",
   "description": "Shared OpenIoT API modules",
   "main": "src/index.ts",
   "type": "module",
