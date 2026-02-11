@@ -4,6 +4,7 @@ import { objectId } from "../validations/custom.validation.js";
 import {
   zGet,
   zObjectId,
+  zObjectIdFor,
   zPatchBody,
   zUpdate,
   zDelete,
@@ -66,6 +67,11 @@ export const updateEntrySchema = {
 };
 
 export const getEventsSchema = {
+  params: z.object({
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
+  }),
   query: z
     .object({
       DateStart: z.string(),
@@ -92,14 +98,29 @@ export const createCustomerPortalSessionSchema = {
 export const createDeviceSchema = {
   body: z.object({
     kind: z.string().optional(),
-    patient: zObjectId.optional().nullable(),
-    paper: zObjectId.optional().nullable(),
-    organization: zObjectId.openapi({ description: "Organization ObjectId" }),
+    patient: zObjectIdFor("patient")
+      .optional()
+      .nullable()
+      .openapi({ description: "Patient ObjectId", example: null }),
+    paper: zObjectIdFor("paper")
+      .optional()
+      .nullable()
+      .openapi({ description: "Paper ObjectId", example: null }),
+    organization: zObjectIdFor("organization").openapi({
+      description: "Organization ObjectId",
+    }),
   }),
 };
 export const deleteDeviceSchema = zDelete("deviceId");
 export const getDeviceSchema = zGet("deviceId");
-export const getImageSchema = zGet("deviceId");
+export const getImageSchema = {
+  params: z.object({
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
+    uuid: z.string().openapi({ description: "Image UUID" }),
+  }),
+};
 export const ledLightSchema = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
@@ -149,7 +170,9 @@ export const ledLightSchema = {
 };
 export const pingDeviceSchema = {
   params: z.object({
-    deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
   }),
   query: z.object({
     dataResponse: z
@@ -160,34 +183,49 @@ export const pingDeviceSchema = {
 
 export const resetDeviceSchema = {
   params: z.object({
-    deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
   }),
 };
 
 export const rebootDeviceSchema = zGet("deviceId");
 
 export const registerDeviceSchema = {
-  ...zPagination,
-  body: z.object({
-    enable: z.boolean(),
-    organization: zObjectId,
-    patient: zObjectId.optional().nullable(),
-    paper: zObjectId.optional().nullable(),
-  }),
+  body: z
+    .object({
+      enable: z.boolean(),
+      organization: zObjectIdFor("organization"),
+      patient: zObjectId.optional().nullable(),
+      paper: zObjectId.optional().nullable(),
+    })
+    .openapi({
+      example: {
+        enable: true,
+        organization:
+          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID || "682fd0d7d4a6325d9d45b86d",
+        patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+        paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || null,
+      },
+    }),
   params: z.object({
-    deviceId: z.string(),
-  }),
-  query: zPagination.query.extend({
-    patient: zObjectId.optional(),
-    organization: zObjectId.optional(),
+    deviceId: (
+      process.env.SCHEMA_STRICT_EXAMPLES === "true" &&
+      process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL
+        ? z.literal(process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL)
+        : z.string()
+    ).openapi({
+      description: "Device serial",
+      example: process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL || "DEVICE-EXAMPLE",
+    }),
   }),
 };
 
 export const queryDevicesSchema = {
   ...zPagination,
   query: zPagination.query.extend({
-    patient: zObjectId.optional(),
-    organization: zObjectId.optional(),
+    patient: zObjectIdFor("patient").optional(),
+    organization: zObjectIdFor("organization"),
   }),
 };
 export const subscriptionSchema = {
@@ -213,9 +251,33 @@ export const updateDeviceSchema = {
   }),
 };
 
-export const updateSingleImageMetaSchema = {};
-export const uploadSingleImageSchema = {
-  body: z.object({
-    file: z.instanceof(File).openapi({ description: "File to upload" }),
+export const updateSingleImageMetaSchema = {
+  params: z.object({
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
   }),
+  body: z
+    .object({
+      meta: z.record(z.any()).optional(),
+    })
+    .openapi({ description: "Image metadata updates" }),
+};
+export const uploadSingleImageSchema = {
+  params: z.object({
+    deviceId: zObjectIdFor("deviceId").openapi({
+      description: "Device ObjectId",
+    }),
+  }),
+  body: z
+    .object({
+      uuid: z
+        .string()
+        .optional()
+        .openapi({ description: "Optional image UUID", example: "mock-uuid" }),
+    })
+    .openapi({
+      description: "Multipart body is mocked during tests.",
+      example: { uuid: "mock-uuid" },
+    }),
 };

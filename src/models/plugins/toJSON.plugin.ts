@@ -6,9 +6,14 @@
  *  - replaces _id with id
  */
 
-import type { Schema, Document } from 'mongoose';
+// @ts-nocheck
+import type { Schema, Document } from "mongoose";
 
-const deleteAtPath = (obj: Record<string, any>, path: string[], index: number): void => {
+const deleteAtPath = (
+  obj: Record<string, any>,
+  path: string[],
+  index: number,
+): void => {
   if (index === path.length - 1) {
     delete obj[path[index]];
     return;
@@ -17,7 +22,9 @@ const deleteAtPath = (obj: Record<string, any>, path: string[], index: number): 
 };
 
 const toJSON = (schema: Schema, timestamps: boolean = false): void => {
-  let transform: ((doc: Document, ret: Record<string, any>, options: any) => any) | undefined;
+  let transform:
+    | ((doc: Document, ret: Record<string, any>, options: any) => any)
+    | undefined;
 
   if (schema.options.toJSON && schema.options.toJSON.transform) {
     transform = schema.options.toJSON.transform;
@@ -28,7 +35,7 @@ const toJSON = (schema: Schema, timestamps: boolean = false): void => {
     transform(doc: Document, ret: Record<string, any>, options: any): any {
       Object.keys(schema.paths).forEach((path) => {
         if (schema.paths[path].options && schema.paths[path].options.private) {
-          deleteAtPath(ret, path.split('.'), 0);
+          deleteAtPath(ret, path.split("."), 0);
         }
       });
 

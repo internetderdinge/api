@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from "zod";
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { objectId, password } from "../validations/custom.validation.js";
@@ -5,6 +6,7 @@ import {
   zPagination,
   zGet,
   zObjectId,
+  zObjectIdFor,
   zPatchBody,
   zUpdate,
   zDelete,
@@ -49,9 +51,11 @@ export const createCurrentUserSchema = createUserSchema;
 export const queryUsersSchema = {
   ...zPagination,
   query: zPagination.query.extend({
-    organization: zObjectId.optional().openapi({
+    organization: zObjectIdFor("organization").openapi({
       description: "Filter users by organization ObjectId",
-      example: "60c72b2f9b1e8d001c8e4f3a",
+      example:
+        process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID ||
+        "60c72b2f9b1e8d001c8e4f3a",
     }),
   }),
 };

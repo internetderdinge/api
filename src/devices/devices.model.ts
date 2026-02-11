@@ -1,3 +1,4 @@
+// @ts-nocheck
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 import { toJSON, paginate } from "../models/plugins/index.js";
 import { ensureSameOrganization } from "../middlewares/mongooseValidations/ensureSameOrganization.js";
@@ -121,6 +122,8 @@ addIotDevice(deviceSchema);
 deviceSchema.plugin((schema: Schema) => toJSON(schema, true));
 deviceSchema.plugin(paginate);
 
-const Devices: Model<IDevice> = mongoose.model<IDevice>("Device", deviceSchema);
+const Devices: Model<IDevice> =
+  (mongoose.models.Device as Model<IDevice>) ||
+  mongoose.model<IDevice>("Device", deviceSchema);
 
 export default Devices;

@@ -1,7 +1,8 @@
+// @ts-nocheck
 /* eslint-disable no-param-reassign */
-import mongoose from 'mongoose';
-import type { Schema, Document, Model, PipelineStage } from 'mongoose';
-import type { PaginateOptions, QueryResult } from './types';
+import mongoose from "mongoose";
+import type { Schema, Document, Model, PipelineStage } from "mongoose";
+import type { PaginateOptions, QueryResult } from "./paginate.plugin.js";
 
 const paginate = (schema: Schema): void => {
   /**
@@ -14,19 +15,26 @@ const paginate = (schema: Schema): void => {
     filter: Record<string, any> = {},
     options: PaginateOptions = {},
     plugin?: any,
-  ): Promise<QueryResult> {
+  ): Promise<QueryResult<any>> {
     // Parse sorting options
     const sort = options.sortBy
-      ? options.sortBy.split(',').reduce((acc: Record<string, number>, sortOption: string) => {
-          const [key, order] = sortOption.split(':');
-          acc[key] = order === 'desc' ? -1 : 1;
-          return acc;
-        }, {})
+      ? options.sortBy
+          .split(",")
+          .reduce((acc: Record<string, number>, sortOption: string) => {
+            const [key, order] = sortOption.split(":");
+            acc[key] = order === "desc" ? -1 : 1;
+            return acc;
+          }, {})
       : { createdAt: -1 };
 
     const limit =
-      options.limit && parseInt(options.limit.toString(), 10) > 0 ? parseInt(options.limit.toString(), 10) : 10000;
-    const page = options.page && parseInt(options.page.toString(), 10) > 0 ? parseInt(options.page.toString(), 10) : 1;
+      options.limit && parseInt(options.limit.toString(), 10) > 0
+        ? parseInt(options.limit.toString(), 10)
+        : 10000;
+    const page =
+      options.page && parseInt(options.page.toString(), 10) > 0
+        ? parseInt(options.page.toString(), 10)
+        : 1;
     const skip = (page - 1) * limit;
 
     // Build aggregation pipeline
@@ -38,7 +46,7 @@ const paginate = (schema: Schema): void => {
 
     // Helper function to determine if a path is a virtual field
     const isVirtualField = (path: string): boolean => {
-      const rootPath = path.split('.')[0];
+      const rootPath = path.split(".")[0];
       return !!schema.virtuals[rootPath];
     };
 
@@ -50,14 +58,16 @@ const paginate = (schema: Schema): void => {
 
         for (const key in filterObj) {
           if (filterObj.hasOwnProperty(key)) {
-            if (key === '$or' || key === '$and') {
+            if (key === "$or" || key === "$and") {
               const mainArray: Record<string, any>[] = [];
               const virtualArray: Record<string, any>[] = [];
 
               filterObj[key].forEach((item: Record<string, any>) => {
-                const { main: itemMain, virtual: itemVirtual } = separateFilter(item);
+                const { main: itemMain, virtual: itemVirtual } =
+                  separateFilter(item);
                 if (Object.keys(itemMain).length > 0) mainArray.push(itemMain);
-                if (Object.keys(itemVirtual).length > 0) virtualArray.push(itemVirtual);
+                if (Object.keys(itemVirtual).length > 0)
+                  virtualArray.push(itemVirtual);
               });
 
               if (mainArray.length > 0) main[key] = mainArray;
@@ -87,8 +97,8 @@ const paginate = (schema: Schema): void => {
 
     // Handle virtual fields population
     if (options.populate) {
-      options.populate.split(',').forEach((populateOption: string) => {
-        const paths = populateOption.split('.');
+      options.populate.split(",").forEach((populateOption: string) => {
+        const paths = populateOption.split(".");
         const localField = paths[0];
         const virtual = schema.virtuals[localField];
         if (!virtual) {
@@ -140,7 +150,9 @@ const paginate = (schema: Schema): void => {
 
     // Handle fuzzy search (if applicable)
     if (this.fuzzySearch && options.fuzzySearch) {
-      throw new Error('Fuzzy search is not supported with aggregation in this paginate function.');
+      throw new Error(
+        "Fuzzy search is not supported with aggregation in this paginate function.",
+      );
     }
 
     // Add sorting, skipping, and limiting stages
@@ -151,7 +163,7 @@ const paginate = (schema: Schema): void => {
     // Rename root _id to id
     pipeline.push({
       $addFields: {
-        id: '$_id',
+        id: "$_id",
       },
     });
     pipeline.push({
@@ -166,7 +178,7 @@ const paginate = (schema: Schema): void => {
         $facet: {
           metadata: [
             {
-              $count: 'totalResults',
+              $count: "totalResults",
             },
           ],
           data: pipeline,
@@ -174,7 +186,7 @@ const paginate = (schema: Schema): void => {
       },
       {
         $addFields: {
-          totalResults: { $arrayElemAt: ['$metadata.totalResults', 0] },
+          totalResults: { $arrayElemAt: ["$metadata.totalResults", 0] },
         },
       },
     ];

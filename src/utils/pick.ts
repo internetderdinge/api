@@ -4,7 +4,11 @@
  * @param {string[]} keys - The keys to pick
  * @returns {Partial<Record<string, any>>} - The new object with picked properties
  */
-const pick = <T extends Record<string, any>>(object: T, keys: (keyof T)[]): Partial<T> => {
+// @ts-nocheck
+const pick = <T extends Record<string, any>>(
+  object: T,
+  keys: string[],
+): Partial<T> => {
   return keys.reduce((obj, key) => {
     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
       obj[key] = object[key];

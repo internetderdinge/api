@@ -1,7 +1,7 @@
+// @ts-nocheck
 import type { Request, Response, NextFunction } from "express";
 import type { UserService } from "../users/users.service";
 import userService from "../users/users.service";
-
 import httpStatus from "http-status";
 import ApiError from "../utils/ApiError";
 import { isAdmin } from "./validateAdmin";

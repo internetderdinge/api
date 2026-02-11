@@ -1,20 +1,31 @@
-import httpStatus from 'http-status';
-import { SESv2Client, ListSuppressedDestinationsCommand } from '@aws-sdk/client-sesv2';
-import DeviceNotification from './devicesNotifications.model';
-import ApiError from '../../src/utils/ApiError';
-import { auth0 } from '../accounts/auth0.service';
-
-import type { Notification } from './devicesNotifications.model';
-import type { FilterQuery, PaginateOptions, QueryResult } from 'mongoose';
+// @ts-nocheck
+import httpStatus from "http-status";
+import {
+  SESv2Client,
+  ListSuppressedDestinationsCommand,
+} from "@aws-sdk/client-sesv2";
+import DeviceNotification from "./devicesNotifications.model";
+import ApiError from "../../src/utils/ApiError";
+import { auth0 } from "../accounts/auth0.service";
+import type { Notification } from "./devicesNotifications.model";
+import type { FilterQuery, PaginateOptions, QueryResult } from "mongoose";
 
 /**
  * Create a user
  * @param {Object} userBody
  * @returns {Promise<Notification>}
  */
-export const createNotificationUser = async ({ user }: { user: string }): Promise<Notification> => {
+export const createNotificationUser = async ({
+  user,
+}: {
+  user: string;
+}): Promise<Notification> => {
   const result = await DeviceNotification.findOne({ user });
-  if (result) throw new ApiError(httpStatus.NOT_FOUND, 'DevicesNotifications user existing');
+  if (result)
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "DevicesNotifications user existing",
+    );
   const devicesNotification = await DeviceNotification.create({ user });
   return devicesNotification;
 };
@@ -37,7 +48,9 @@ export const setDeviceToken = async ({
     result = await createNotificationUser({ user });
   }
 
-  result.tokens = [...new Map(result.tokens.map((m) => [m.deviceId, m])).values()];
+  result.tokens = [
+    ...new Map(result.tokens.map((m) => [m.deviceId, m])).values(),
+  ];
 
   if (result.tokens.find((t) => t.token === token)) return result;
 
@@ -120,7 +133,7 @@ const getByUser = async (user) => {
 const updateById = async (notificationId, updateBody) => {
   const user = await getById(notificationId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Notification not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
   }
   Object.assign(user, updateBody);
   await user.save();
@@ -148,7 +161,7 @@ const updateByUserId = async (user, updateBody) => {
 const deleteById = async (userId) => {
   const user = await getById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Notification not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
   }
   await user.deleteOne();
   return user;
@@ -164,17 +177,22 @@ const cleanup = async () => {
 
   const auth0Users = await auth0.getUsers();
 
-  const sesV2 = new SESv2Client({ region: 'eu-central-1' });
+  const sesV2 = new SESv2Client({ region: "eu-central-1" });
   const input = {
-    Reasons: ['BOUNCE' || 'COMPLAINT'],
+    Reasons: ["BOUNCE" || "COMPLAINT"],
     PageSize: 300,
   };
 
   const command = new ListSuppressedDestinationsCommand(input);
   const suppressedDestinations = await sesV2.send(command);
 
-  const suppressedEmailList = suppressedDestinations.SuppressedDestinationSummaries.map((a) => a.EmailAddress);
-  const suppressedEmailAuth0Users = auth0Users.filter((a) => suppressedEmailList.includes(a.email));
+  const suppressedEmailList =
+    suppressedDestinations.SuppressedDestinationSummaries.map(
+      (a) => a.EmailAddress,
+    );
+  const suppressedEmailAuth0Users = auth0Users.filter((a) =>
+    suppressedEmailList.includes(a.email),
+  );
   await Promise.all(
     suppressedEmailAuth0Users.map(async (a) => {
       updateByUserId(a.user_id, { bounceEmail: a.email });

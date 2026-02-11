@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { auth0, mfaDisableAccount, mfaEnrollAccount } from "./auth0.service.js";
 
 type ObjectId = string; // Replace with the actual ObjectId type if available

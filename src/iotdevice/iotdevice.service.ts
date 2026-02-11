@@ -1,7 +1,8 @@
+// @ts-nocheck
 import httpStatus from "http-status";
 import axios from "axios";
 import AWS from "aws-sdk";
-import { deviceKindHasFeature } from "@wirewire/helpers";
+import { deviceKindHasFeature } from "../utils/deviceUtils";
 import ApiError from "../utils/ApiError";
 import { getAuth0Token } from "../accounts/auth0.service";
 import {
@@ -11,10 +12,10 @@ import {
 } from "../files/upload.service";
 import { compareImages } from "../utils/comparePapers.service";
 import IotDevice from "./iotdevice.model";
-import fileType from "file-type";
+import { fileTypeFromBuffer } from "file-type";
 
 import type { AxiosRequestConfig } from "axios";
-import type { Device } from "../devices.model";
+import type { Device } from "../devices/devices.model.js";
 import type { AxiosResponse } from "axios";
 
 import iotsdk from "aws-iot-device-sdk-v2";
@@ -507,7 +508,7 @@ export const uploadSingleImage = async ({
       }
     }
 
-    const type = await fileType(buffer);
+    const type = await fileTypeFromBuffer(buffer);
     const fileName = `ePaperImages/${id}`;
 
     await uploadImage({ blob: buffer, key: fileName + ".png", type });

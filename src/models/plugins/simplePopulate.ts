@@ -1,10 +1,15 @@
 function simplePopulate(populate: string): Record<string, any> {
   let docsPromise: Record<string, any> = {};
-  populate.split(',').forEach((populateOption) => {
+  populate.split(",").forEach((populateOption) => {
     docsPromise = populateOption
-      .split('.')
+      .split(".")
       .reverse()
-      .reduce((a, b) => ({ path: b, populate: a }));
+      .reduce<Record<string, any>>((acc, key) => {
+        if (Object.keys(acc).length === 0) {
+          return { path: key };
+        }
+        return { path: key, populate: acc };
+      }, {});
   });
   return docsPromise;
 }

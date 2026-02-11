@@ -1,5 +1,4 @@
-import express from "express";
-const { Request, Response } = express;
+import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import pick from "../utils/pick.js";
 import ApiError from "../utils/ApiError.js";

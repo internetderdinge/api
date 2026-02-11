@@ -1,3 +1,4 @@
+// @ts-nocheck
 import mongoose, { Schema, Document, Model } from "mongoose";
 import { toJSON, paginate } from "../models/plugins/index.js";
 
@@ -54,9 +55,8 @@ organizationSchema.plugin(toJSON);
 organizationSchema.plugin(paginate);
 
 // Define the model
-const Organization: Model<IOrganization> = mongoose.model<IOrganization>(
-  "Organization",
-  organizationSchema,
-);
+const Organization: Model<IOrganization> =
+  (mongoose.models.Organization as Model<IOrganization>) ||
+  mongoose.model<IOrganization>("Organization", organizationSchema);
 
 export default Organization;

@@ -38,16 +38,15 @@ export const createToken = async (
 
 // Get a token by ID
 export const getToken = async (
-  req: Request,
+  req: Request<{ tokenId: string }>,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
     const token = await tokensService.getTokenById(req.params.tokenId);
     if (!token) {
-      return res
-        .status(httpStatus.NOT_FOUND)
-        .send({ message: "Token not found" });
+      res.status(httpStatus.NOT_FOUND).send({ message: "Token not found" });
+      return;
     }
     res.send(token);
   } catch (error) {
@@ -57,16 +56,15 @@ export const getToken = async (
 
 // Delete a token by ID
 export const deleteToken = async (
-  req: Request,
+  req: Request<{ tokenId: string }>,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
     const token = await tokensService.deleteTokenById(req.params.tokenId);
     if (!token) {
-      return res
-        .status(httpStatus.NOT_FOUND)
-        .send({ message: "Token not found" });
+      res.status(httpStatus.NOT_FOUND).send({ message: "Token not found" });
+      return;
     }
     res.status(httpStatus.NO_CONTENT).send();
   } catch (error) {

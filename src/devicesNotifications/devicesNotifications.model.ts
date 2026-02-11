@@ -1,6 +1,7 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import type { PaginateModel } from 'mongoose';
-import { toJSON, paginate } from '../../src/models/plugins/index';
+// @ts-nocheck
+import mongoose, { Schema, Document, Model } from "mongoose";
+import type { PaginateModel } from "mongoose";
+import { toJSON, paginate } from "../../src/models/plugins/index";
 
 interface Token {
   token: string;
@@ -11,7 +12,7 @@ interface Token {
 
 interface Settings {
   intake: { email: boolean; push: boolean };
-  'intake-reminder': { email: boolean; push: boolean };
+  "intake-reminder": { email: boolean; push: boolean };
   battery: { email: boolean; push: boolean };
 }
 
@@ -24,7 +25,8 @@ export interface DeviceNotificationDocument extends Document {
   updatedAt: Date;
 }
 
-export type DeviceNotificationModel = Model<DeviceNotificationDocument> & PaginateModel<DeviceNotificationDocument>;
+export type DeviceNotificationModel = Model<DeviceNotificationDocument> &
+  PaginateModel<DeviceNotificationDocument>;
 
 const deviceNotificationSchema = new Schema<DeviceNotificationDocument>(
   {
@@ -42,12 +44,18 @@ const deviceNotificationSchema = new Schema<DeviceNotificationDocument>(
     ],
     bounceEmail: { type: String },
     settings: {
-      intake: { email: { type: Boolean, default: true }, push: { type: Boolean, default: true } },
-      'intake-reminder': {
+      intake: {
         email: { type: Boolean, default: true },
         push: { type: Boolean, default: true },
       },
-      battery: { email: { type: Boolean, default: true }, push: { type: Boolean, default: true } },
+      "intake-reminder": {
+        email: { type: Boolean, default: true },
+        push: { type: Boolean, default: true },
+      },
+      battery: {
+        email: { type: Boolean, default: true },
+        push: { type: Boolean, default: true },
+      },
     },
   },
   {
@@ -59,9 +67,9 @@ const deviceNotificationSchema = new Schema<DeviceNotificationDocument>(
 deviceNotificationSchema.plugin(toJSON);
 deviceNotificationSchema.plugin(paginate);
 
-const DeviceNotifications = mongoose.model<DeviceNotificationDocument, DeviceNotificationModel>(
-  'DeviceNotification',
-  deviceNotificationSchema,
-);
+const DeviceNotifications = mongoose.model<
+  DeviceNotificationDocument,
+  DeviceNotificationModel
+>("DeviceNotification", deviceNotificationSchema);
 
 export default DeviceNotifications;

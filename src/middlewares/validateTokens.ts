@@ -21,7 +21,8 @@ export async function validateParamsToken(
   }
 
   // compare owner vs. authenticated sub
-  if (token.owner !== res.req.auth.sub) {
+  const tokenOwner = (token as { owner?: string }).owner;
+  if (!tokenOwner || tokenOwner !== res.req.auth?.sub) {
     return next(
       new ApiError(
         httpStatus.FORBIDDEN,

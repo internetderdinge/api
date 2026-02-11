@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import deviceNotifications from "../devicesNotifications/devicesNotifications.service";

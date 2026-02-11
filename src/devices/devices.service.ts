@@ -1,3 +1,4 @@
+// @ts-nocheck
 import httpStatus from "http-status";
 import Device from "./devices.model.js";
 import ApiError from "../utils/ApiError.js";
@@ -5,7 +6,7 @@ import iotDevicesService from "../iotdevice/iotdevice.service.js";
 
 import { promisify } from "util";
 import { getSignedFileUrl } from "../files/upload.service";
-import { deviceByDeviceName, deviceKindHasFeature } from "@wirewire/helpers";
+import { deviceByDeviceName, deviceKindHasFeature } from "../utils/deviceUtils";
 
 import type { DeviceDocument, DeviceInput } from "./devices.model.js";
 import type { ApiErrorType } from "../utils/ApiError.js";

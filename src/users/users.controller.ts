@@ -18,13 +18,13 @@ export const createUser = catchAsync(
   async (req: AuthRequest<{}, any, {}>, res: Response) => {
     const { body } = req;
     if (body.email) {
-      const auth0user = await auth0Service.getUserIdByEmail(body.email);
+      const auth0users = await auth0Service.getUserIdByEmail(body.email);
       body.status = "invited";
       body.inviteCode = crypto.randomBytes(48).toString("base64url");
 
-      if (auth0user.data[0]) {
+      if (auth0users[0]) {
         const userFound = await userService.getUserByOwner(
-          auth0user.data[0].user_id,
+          auth0users[0].user_id,
           body.organization,
         );
         if (userFound) {
@@ -101,10 +101,8 @@ export const getCurrentUser = catchAsync(
     req: AuthRequest<{}, any, { organization?: string }>,
     res: Response,
   ) => {
-    const result = await userService.getUserByOwner(
-      req.auth.sub,
-      req.query.organization,
-    );
+    const organization = req.query.organization as string;
+    const result = await userService.getUserByOwner(req.auth.sub, organization);
     res.send(result);
   },
 );
@@ -181,9 +179,10 @@ export const getInvite = catchAsync(
         `User not found token: ${authReq.params.inviteCode}`,
       );
     }
+    const organizationId = String(user.organization);
     const already = await userService.getUserByOwner(
       authReq.auth.sub,
-      user.organization,
+      organizationId,
     );
     if (already) {
       throw new ApiError(httpStatus.CONFLICT, "User already in organization");
@@ -222,7 +221,7 @@ export const organizationRemove = catchAsync(
 export const cleanup = catchAsync(async (_req: Request, res: Response) => {
   const all = await userService.queryAllCalendars();
   const filtered = all.filter((e) => e.organizationData === null);
-  const ids = filtered.map((e) => e._id);
+  const ids = filtered.map((e) => String(e._id));
   const deleted = await userService.deleteMany(ids);
   res.send({
     deleted,

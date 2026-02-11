@@ -1,12 +1,13 @@
 import crypto from "crypto";
 import type { Document } from "mongoose";
 import Token from "./tokens.model.js";
+import type { QueryResult } from "../models/plugins/paginate.plugin.js";
 
 export const queryTokens = async (
   filter: Record<string, any>,
   options: { sortBy?: string; limit?: number; page?: number },
-): Promise<QueryResult> => {
-  return Token.paginate(filter, options);
+): Promise<QueryResult<any>> => {
+  return (Token as any).paginate(filter, options);
 };
 
 export const createToken = async (

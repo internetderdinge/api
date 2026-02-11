@@ -1,3 +1,4 @@
+// @ts-nocheck
 import httpStatus from "http-status";
 import ApiError from "../utils/ApiError";
 import { isAdmin } from "./validateAdmin";

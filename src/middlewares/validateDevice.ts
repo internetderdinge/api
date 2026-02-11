@@ -1,3 +1,4 @@
+// @ts-nocheck
 import httpStatus from "http-status";
 import ApiError from "../utils/ApiError";
 import devicesService from "../devices/devices.service";

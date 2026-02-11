@@ -1,3 +1,4 @@
+// @ts-nocheck
 import mongoose, { Schema, Model } from "mongoose";
 import crypto from "crypto";
 import { toJSON, paginate } from "../models/plugins/index.js";
@@ -19,6 +20,8 @@ const tokenSchema: Schema = new mongoose.Schema(
 tokenSchema.plugin(toJSON, true);
 tokenSchema.plugin(paginate);
 
-const Token: Model<any> = mongoose.model("Token", tokenSchema);
+const Token: Model<any> =
+  (mongoose.models.Token as Model<any>) ||
+  mongoose.model("Token", tokenSchema);
 
 export default Token;

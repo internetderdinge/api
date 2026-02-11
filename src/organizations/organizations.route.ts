@@ -31,7 +31,7 @@ export const organizationsRouteSpecs: RouteSpec[] = [
     path: "/",
     validate: [auth("manageUsers")],
     requestSchema: createOrganizationSchema,
-    responseSchema: {},
+    responseSchema: organizationResponseSchema,
     handler: createOrganization,
     summary: "Create a new organization",
     description: "Creates a new organization with the provided details.",

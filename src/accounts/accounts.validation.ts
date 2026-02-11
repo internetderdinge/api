@@ -38,7 +38,8 @@ export const getAccountSchema = {
     accountId: z
       .string()
       .openapi({
-        example: "auth0%7C60452f4c0dc85b0062326",
+        example:
+          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
         description: "Auth Account ID",
       }),
   }),
@@ -49,7 +50,8 @@ export const updateAccountSchema = {
     accountId: z
       .string()
       .openapi({
-        example: "auth0%7C60452f4c0dc85b0062326",
+        example:
+          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
         description: "Auth Account ID",
       }),
   }),
@@ -91,7 +93,8 @@ export const deleteEntrySchema = {
     accountId: z
       .string()
       .openapi({
-        example: "auth0%7C60452f4c0dc85b0062326",
+        example:
+          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
         description: "Auth Account ID",
       }),
   }),

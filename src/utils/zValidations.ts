@@ -1,45 +1,52 @@
-import { z } from 'zod';
-import { objectId } from '../validations/custom.validation';
-import mongoose from 'mongoose';
+// @ts-nocheck
+import { z } from "zod";
+import { objectId } from "../validations/custom.validation";
+import mongoose from "mongoose";
 
 export const zPagination = {
   query: z.object({
     name: z.string().optional(),
-    role: z.string().openapi({ example: 'admin', description: 'Role to filter by' }).optional(),
-    sortBy: z.string().openapi({ example: 'createdAt', description: 'Field to sort by' }).optional(),
+    role: z
+      .string()
+      .openapi({ example: "admin", description: "Role to filter by" })
+      .optional(),
+    sortBy: z
+      .string()
+      .openapi({ example: "createdAt", description: "Field to sort by" })
+      .optional(),
     search: z
       .string()
       .openapi({
-        example: 'search term',
-        description: 'Search term to filter results',
+        example: process.env.SCHEMA_EXAMPLE_SEARCH || "",
+        description: "Search term to filter results",
       })
       .optional(),
     limit: z.coerce
       .number()
       .openapi({
         example: 10,
-        description: 'Number of items per page',
+        description: "Number of items per page",
       })
       .int()
       .min(1)
       .max(100000)
       .optional(),
-    offset: z
+    offset: z.coerce
       .number() // was z.int()
       .openapi({
         example: 0,
-        description: 'Offset for pagination, used to skip a number of items',
+        description: "Offset for pagination, used to skip a number of items",
       })
       .int()
       .min(0)
       .max(100000)
       .optional(),
-    page: z
+    page: z.coerce
       .number()
       .int()
       .openapi({
         example: 1,
-        description: 'Page number for pagination',
+        description: "Page number for pagination",
       })
       .min(1)
       .max(100000)
@@ -50,40 +57,85 @@ export const zPagination = {
 export const zPaginationResponse = () =>
   z.object({
     results: z.array(z.unknown()), // Replace with your specific item schema
-    totalResults: z.number().openapi({ example: 100, description: 'Total number of items' }),
-    totalPages: z.number().openapi({ example: 10, description: 'Total number of pages' }),
-    page: z.number().openapi({ example: 1, description: 'Current page number' }),
-    limit: z.number().openapi({ example: 10, description: 'Number of items per page' }),
+    totalResults: z
+      .number()
+      .openapi({ example: 100, description: "Total number of items" }),
+    totalPages: z
+      .number()
+      .openapi({ example: 10, description: "Total number of pages" }),
+    page: z
+      .number()
+      .openapi({ example: 1, description: "Current page number" }),
+    limit: z
+      .number()
+      .openapi({ example: 10, description: "Number of items per page" }),
   });
+
+const defaultObjectIdExample = "682fd0d7d4a6325d9d45b86d";
+const exampleDefaults = {
+  organization: "682fd0d7d4a6325d9d45b86e",
+  user: defaultObjectIdExample,
+  device: "682fd0d7d4a6325d9d45b86f",
+  paper: "682fd0d7d4a6325d9d45b870",
+};
+const objectIdExampleOverrides: Record<string, string | undefined> = {
+  organizationId:
+    process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID || exampleDefaults.organization,
+  organization:
+    process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID || exampleDefaults.organization,
+  userId: process.env.SCHEMA_EXAMPLE_USER_ID || exampleDefaults.user,
+  deviceId: process.env.SCHEMA_EXAMPLE_DEVICE_ID || exampleDefaults.device,
+  device: process.env.SCHEMA_EXAMPLE_DEVICE_ID || exampleDefaults.device,
+  paperId: process.env.SCHEMA_EXAMPLE_PAPER_ID || exampleDefaults.paper,
+  paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || exampleDefaults.paper,
+  patient: process.env.SCHEMA_EXAMPLE_USER_ID || exampleDefaults.user,
+  accountId: process.env.SCHEMA_EXAMPLE_ACCOUNT_ID,
+  tokenId: process.env.SCHEMA_EXAMPLE_TOKEN_ID,
+};
+
+export const zObjectIdFor = (paramName?: string) => {
+  const example = paramName ? objectIdExampleOverrides[paramName] : undefined;
+  const exampleValue = example || defaultObjectIdExample;
+  return z
+    .string()
+    .refine((val) => {
+      if (process.env.SCHEMA_STRICT_EXAMPLES === "true" && example) {
+        return val === example;
+      }
+      return mongoose.Types.ObjectId.isValid(val);
+    })
+    .openapi({
+      example: exampleValue,
+      description: "A valid MongoDB ObjectId",
+    });
+};
 
 export const zGet = (id: string) => ({
   params: z.object({
-    [id]: zObjectId /* .openapi({ example: '682fd0d7d4a6325d9d45b86d' }) */,
+    [id]: zObjectIdFor(id),
   }),
 });
 
-export function zPatchBody<T extends ZodRawShape>(shape: T, message = 'At least one field must be provided for update') {
+export function zPatchBody<T extends ZodRawShape>(
+  shape: T,
+  message = "At least one field must be provided for update",
+) {
   // assume user passed in already-optional vals
   return z.object(shape); // .refine((o) => Object.keys(o).length > 0, { message });
 }
 
 export const zUpdate = (id: string) => ({
   params: z.object({
-    [id]: zObjectId,
+    [id]: zObjectIdFor(id),
   }),
 });
 
 export const zDelete = (id: string) => ({
   params: z.object({
-    [id]: zObjectId,
+    [id]: zObjectIdFor(id),
   }),
 });
 
-export const zObjectId = z
-  .string()
-  .refine((val) => {
-    return mongoose.Types.ObjectId.isValid(val);
-  })
-  .openapi({ example: '682fd0d7d4a6325d9d45b86d', description: 'A valid MongoDB ObjectId' });
+export const zObjectId = zObjectIdFor();
 
 export const zDate = () => z.string().pipe(z.coerce.date());

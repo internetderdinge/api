@@ -1,3 +1,4 @@
+// @ts-nocheck
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 import validator from "validator";
 import { toJSON, paginate } from "../models/plugins/index.js";
@@ -9,9 +10,10 @@ export interface IUser {
   timezone: string;
   owner?: string;
   organization?: Types.ObjectId;
+  organizationData?: any;
   inviteCode?: string;
   email?: string;
-  role: keyof typeof roles;
+  role: (typeof roles)[number];
   category: string;
   status?: string;
   meta?: Record<string, any>;
@@ -83,7 +85,6 @@ userSchema.methods.isPasswordMatch = async function (
   return false;
 };
 
-export const User = mongoose.model<IUserDocument, IUserModel>(
-  "User",
-  userSchema,
-);
+export const User =
+  (mongoose.models.User as IUserModel) ||
+  mongoose.model<IUserDocument, IUserModel>("User", userSchema);

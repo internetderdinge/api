@@ -5,7 +5,7 @@ import { existsSync, readdirSync } from "fs";
 import i18next from "i18next";
 import Backend, { setLocalesFolder } from "./saveMissingLocalJsonBackend";
 
-import config from "@wirewire/openiot-api/src/config/config";
+import config from "../config/config";
 
 // Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -25,7 +25,7 @@ export function initI18n(options: InitI18nOptions = {}): typeof i18next {
   const hasLocalesFolder = existsSync(localesFolder);
 
   if (!i18next.isInitialized) {
-    i18next.use(Backend).init({
+    i18next.use(Backend as any).init({
       initImmediate: false, // setting initImmediate to false, will load the resources synchronously
       fallbackLng: "de",
       preload: hasLocalesFolder

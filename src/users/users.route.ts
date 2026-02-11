@@ -108,7 +108,6 @@ export const userRouteSpecs: RouteSpec[] = [
     privateDocs: true,
     summary: "Get invite details by code",
     description: "Retrieves information about a pending invite using its code.",
-    privateDocs: true,
   },
   {
     method: "post",

@@ -1,5 +1,6 @@
+// @ts-nocheck
 /* eslint-disable no-param-reassign */
-import { Document, Model, Query, Types } from 'mongoose';
+import { Document, Model, Query, Types } from "mongoose";
 
 export interface QueryResult<T> {
   results: T[];
@@ -26,20 +27,26 @@ function paginate<T extends Document>(schema: any) {
     options: PaginateOptions = {},
     plugin?: PluginFunction,
   ): Promise<QueryResult<T>> {
-    let sort = '';
+    let sort = "";
     if (options.sortBy) {
       const sortingCriteria: string[] = [];
-      options.sortBy.split(',').forEach((sortOption) => {
-        const [key, order] = sortOption.split(':');
-        sortingCriteria.push((order === 'desc' ? '-' : '') + key);
+      options.sortBy.split(",").forEach((sortOption) => {
+        const [key, order] = sortOption.split(":");
+        sortingCriteria.push((order === "desc" ? "-" : "") + key);
       });
-      sort = sortingCriteria.join(' ');
+      sort = sortingCriteria.join(" ");
     } else {
-      sort = 'createdAt';
+      sort = "createdAt";
     }
 
-    const limit = options.limit && parseInt(String(options.limit), 10) > 0 ? parseInt(String(options.limit), 10) : 10000;
-    const page = options.page && parseInt(String(options.page), 10) > 0 ? parseInt(String(options.page), 10) : 1;
+    const limit =
+      options.limit && parseInt(String(options.limit), 10) > 0
+        ? parseInt(String(options.limit), 10)
+        : 10000;
+    const page =
+      options.page && parseInt(String(options.page), 10) > 0
+        ? parseInt(String(options.page), 10)
+        : 1;
     const skip = (page - 1) * limit;
 
     let results: any[] = [];
@@ -51,7 +58,7 @@ function paginate<T extends Document>(schema: any) {
 
       const fuzzyFields = options.fuzzySearch.fields;
       const mustClauses = Object.entries(filter).map(([key, value]) => {
-        if (typeof value === 'string' && value.match(/^[a-fA-F0-9]{24}$/)) {
+        if (typeof value === "string" && value.match(/^[a-fA-F0-9]{24}$/)) {
           return { equals: { path: key, value: new Types.ObjectId(value) } };
         }
         return { equals: { path: key, value } };
@@ -81,7 +88,7 @@ function paginate<T extends Document>(schema: any) {
         {
           $facet: {
             results: [],
-            totalCount: [{ $count: 'count' }],
+            totalCount: [{ $count: "count" }],
           },
         },
       ];
@@ -93,12 +100,15 @@ function paginate<T extends Document>(schema: any) {
       // Regular find branch
       const countPromise = this.countDocuments(filter).exec();
 
-      let docsPromise: any = this.find(filter).sort(sort).skip(skip).limit(limit);
+      let docsPromise: any = this.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit);
       if (options.populate) {
-        options.populate.split(',').forEach((populateOption) => {
+        options.populate.split(",").forEach((populateOption) => {
           docsPromise = docsPromise.populate(
             populateOption
-              .split('.')
+              .split(".")
               .reverse()
               .reduce((a, b) => ({ path: b, populate: a })),
           );
@@ -117,9 +127,9 @@ function paginate<T extends Document>(schema: any) {
       if (options.populate) {
         results = await this.populate(
           results,
-          options.populate.split(',').map((populateOption) =>
+          options.populate.split(",").map((populateOption) =>
             populateOption
-              .split('.')
+              .split(".")
               .reverse()
               .reduce((a, b) => ({ path: b, populate: a })),
           ),

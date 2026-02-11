@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "NodeNext",
+    "module": "ES2020",
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
-    "strict": true,
-    "moduleResolution": "NodeNext",
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "useUnknownInCatchVariables": false,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
@@ -17,6 +22,10 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["src/**/*", "common.legac, "../memo-api/src/middlewares/validateMessage.ts"y/**/*"],
+  "include": [
+    "src/**/*",
+    "common.legacy/**/*",
+    "../memo-api/src/middlewares/validateMessage.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

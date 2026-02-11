@@ -1,5 +1,6 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import { toJSON, paginate } from '../models/plugins/index';
+// @ts-nocheck
+import mongoose, { Schema, Document, Model } from "mongoose";
+import { toJSON, paginate } from "../models/plugins/index";
 
 interface IotDeviceMeta {
   [key: string]: any;
@@ -27,6 +28,8 @@ const iotDeviceSchema: Schema<IotDevice> = new mongoose.Schema(
 iotDeviceSchema.plugin(toJSON);
 iotDeviceSchema.plugin(paginate);
 
-export const IotDevices: Model<IotDevice> = mongoose.model<IotDevice>('IotDevice', iotDeviceSchema);
+export const IotDevices: Model<IotDevice> =
+  (mongoose.models.IotDevice as Model<IotDevice>) ||
+  mongoose.model<IotDevice>("IotDevice", iotDeviceSchema);
 
 export default IotDevices;

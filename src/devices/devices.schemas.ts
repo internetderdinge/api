@@ -22,9 +22,9 @@ export const eventResponseSchema = z.object({
   // ...other event fields...
 });
 
-export const genericResponseSchema = z.object({
-  message: z.string(),
-});
+export const genericResponseSchema = z
+  .record(z.any())
+  .openapi({ description: "Generic response payload" });
 
 export const imageResponseSchema = z.object({
   uuid: z.string(),
@@ -64,11 +64,13 @@ export const subscriptionResponseSchema = z.object({
   // ...other subscription fields...
 });
 
-export const uploadResponseSchema = z.object({
-  filenames: z.array(z.string()),
-  urls: z.array(z.string().url()),
-  // ...other upload result fields...
-});
+export const uploadResponseSchema = z
+  .object({
+    key: z.string().optional(),
+    similarityPercentage: z.number().nullable().optional(),
+    skippedUpload: z.boolean().optional(),
+  })
+  .openapi({ description: "Upload response payload" });
 
 export const pingDeviceSchema = {
   params: z.object({
