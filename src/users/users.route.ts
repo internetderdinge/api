@@ -138,7 +138,6 @@ export const userRouteSpecs: RouteSpec[] = [
     handler: userController.updateUser,
     summary: "Update a user by ID",
     description: "Replaces a user’s full record with the provided data.",
-    memoOnly: true,
   },
   {
     method: "patch",
@@ -149,7 +148,6 @@ export const userRouteSpecs: RouteSpec[] = [
     handler: userController.updateUser,
     summary: "Partially update a user by ID",
     description: "Applies partial updates to a user’s record by ID.",
-    memoOnly: true,
   },
   {
     method: "delete",

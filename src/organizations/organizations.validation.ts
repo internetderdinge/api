@@ -52,7 +52,7 @@ export const updateOrganizationSchema = {
       })
       .optional(),
     meta: z
-      .record(z.any())
+      .record(z.string(), z.any())
       .openapi({
         example: { key: "value" },
         description: "Additional metadata for the entry",

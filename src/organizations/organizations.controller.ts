@@ -32,7 +32,6 @@ export const getOrganizations = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const filter = pick(req.query, ["name", "kind"]);
     const options = pick(req.query, ["sortBy", "limit", "page"]);
-    console.log("getOrganizations", req.query, filter, options);
 
     const filteredOptions = filterOptions(req.query, filter, {
       objectIds: ["_id", "patient"],

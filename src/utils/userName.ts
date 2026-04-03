@@ -5,7 +5,7 @@ import type { Patient } from "../types/patient"; // Assuming a `Patient` type ex
 const generateUserName = async (patient: Patient): Promise<string | null> => {
   if (patient.owner) {
     const auth0UserById = await getUserById(patient.owner);
-    patient.auth0User = auth0UserById.data;
+    patient.auth0User = auth0UserById;
   }
 
   if (patient?.auth0User?.app_metadata?.first_name) {

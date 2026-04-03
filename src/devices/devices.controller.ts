@@ -1,7 +1,6 @@
 // @ts-nocheck
 import httpStatus from "http-status";
 import mongoose from "mongoose";
-import multer from "multer";
 import type { Request, Response } from "express";
 import pick from "../utils/pick.js";
 import ApiError from "../utils/ApiError.js";
@@ -129,19 +128,6 @@ const getEntry = catchAsync(
   },
 );
 
-const getImageById = catchAsync(
-  async (req: Request, res: Response): Promise<void> => {
-    const device = await devicesService.getImageById(
-      req.params.deviceId,
-      req.params.uuid,
-    );
-    if (!device) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Device not found");
-    }
-    res.send(device);
-  },
-);
-
 const updateEntry = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     // TODO: Remove in newer versions
@@ -228,54 +214,15 @@ const rebootDevice = catchAsync(
   },
 );
 
-const updateSingleImageMeta = catchAsync(
-  async (req: Request, res: Response): Promise<void> => {
-    const device = await devicesService.getById(req.params.deviceId);
-
-    const { uuid, ...body } = req.body;
-    const deviceUpdate = await devicesService.updateById(req.params.deviceId, {
-      meta: { ...device.meta, file: uuid },
-    });
-    const deviceMeta = await devicesService.updateSingleImageMeta(
-      device.deviceId,
-      body,
-    );
-    res.send({ deviceMeta, deviceUpdate });
-  },
-);
-
-const uploadSingleImage = catchAsync(
-  async (req: Request, res: Response): Promise<void> => {
-    const device = await devicesService.getById(req.params.deviceId);
-
-    const files = req.files as Array<{ buffer: Buffer }> | undefined;
-    if (!files || files.length === 0) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "No image file uploaded");
-    }
-
-    const iotUpload = await iotDevicesService.uploadSingleImage({
-      deviceName: device.deviceId,
-      buffer: files[0].buffer,
-      deviceId: req.params.deviceId,
-      uuid: req.body.uuid,
-    });
-
-    res.send(iotUpload);
-  },
-);
-
 export {
   createEntry,
   getEntries,
   queryDevicesByUser,
   getEvents,
-  getImageById,
   registerDevice,
   pingDevice,
   ledLight,
   rebootDevice,
-  uploadSingleImage,
-  updateSingleImageMeta,
   getEntry,
   updateEntry,
   deleteEntry,

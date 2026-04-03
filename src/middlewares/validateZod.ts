@@ -1,13 +1,13 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { AnyZodObject } from 'zod';
+import type { ZodObject, ZodRawShape } from 'zod';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-import z from 'zod';
+import { z } from 'zod';
 
 interface Schema {
-  body?: AnyZodObject;
-  query?: AnyZodObject;
-  params?: AnyZodObject;
+  body?: ZodObject<ZodRawShape>;
+  query?: ZodObject<ZodRawShape>;
+  params?: ZodObject<ZodRawShape>;
 }
 
 export const validateZod = (schema: Schema) => (req: Request, res: Response, next: NextFunction) => {

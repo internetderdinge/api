@@ -17,7 +17,8 @@ extendZodWithOpenApi(z);
 export const createUserSchema = {
   body: z.object({
     meta: z
-      .record(z.any())
+      .object({})
+      .passthrough()
       .optional()
       .openapi({
         example: { key: "value" },
@@ -71,26 +72,11 @@ export const getCurrentUserSchema = {
 export const updateUserSchema = {
   ...zUpdate("userId"),
   body: zPatchBody({
-    password: z
-      .string()
-      .refine(
-        (val) => {
-          try {
-            password(val);
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        { message: "Invalid password format" },
-      )
-      .optional()
-      .openapi({ description: "New user password" }),
     name: z.string().optional().openapi({ description: "User full name" }),
     timezone: z.string().optional().openapi({ description: "IANA timezone" }),
     avatar: z.string().optional().openapi({ description: "Avatar URL" }),
     meta: z
-      .record(z.any())
+      .object({})
       .optional()
       .openapi({ description: "Additional metadata" }),
     category: z
@@ -107,7 +93,11 @@ export const updateUserSchema = {
       .enum(["user", "admin", "patient", "onlyself"])
       .optional()
       .openapi({ description: "User role" }),
-    inviteCode: z.string().optional().openapi({ description: "Invite code" }),
+    inviteCode: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({ description: "Invite code" }),
     organization: zObjectId
       .optional()
       .openapi({ description: "Organization ObjectId" }),
@@ -128,7 +118,11 @@ export const updateInviteSchema = {
   body: z.object({
     organization: zObjectId.openapi({ description: "Organization ObjectId" }),
     status: z.enum(["accepted"]).openapi({ description: "Invite status" }),
-    inviteCode: z.string().optional().openapi({ description: "Invite code" }),
+    inviteCode: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({ description: "Invite code" }),
   }),
 };
 

@@ -148,7 +148,7 @@ export const iotdeviceRouteSpecs: RouteSpec[] = [
     handler: getApiStatus,
     summary: "Get API status by kind",
     description:
-      "Retrieves the API status information for a given status kind.",
+      "Retrieves the IoT API status information for a given status kind to monitor system health or performance. Can be accessed without authentication for monitoring purposes.",
   },
   {
     method: "get",

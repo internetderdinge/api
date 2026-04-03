@@ -1,13 +1,20 @@
-import AWS from 'aws-sdk';
-import type { SES } from 'aws-sdk';
-import config from '../../src/config/config';
-import i18n from '../../src/i18n/i18n';
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+import config from "../../src/config/config";
+import i18n from "../../src/i18n/i18n";
 
 function urlStartsWithHttp(url: string): boolean {
-  return url.startsWith('http');
+  return url.startsWith("http");
 }
 
-const button = ({ link, text, color = '#0076ff' }: { link: string; text: string; color?: string }): string => {
+const button = ({
+  link,
+  text,
+  color = "#0076ff",
+}: {
+  link: string;
+  text: string;
+  color?: string;
+}): string => {
   return `
   <div><!--[if mso]>
     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${link}" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="15%" stroke="f" fillcolor="${color}">
@@ -23,7 +30,15 @@ const button = ({ link, text, color = '#0076ff' }: { link: string; text: string;
 `;
 };
 
-const actionButton = ({ link, text, color = '#0076ff' }: { link: string; text: string; color?: string }): string => {
+const actionButton = ({
+  link,
+  text,
+  color = "#0076ff",
+}: {
+  link: string;
+  text: string;
+  color?: string;
+}): string => {
   return `<table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
   <tr>
     <td align="center">
@@ -51,40 +66,49 @@ interface SendEmailParams {
 }
 
 export const sendEmail = async ({
-  title = 'Kein Titel',
-  body = 'Kein Inhalt',
-  url = '',
-  domain = 'memo',
+  title = "Kein Titel",
+  body = "Kein Inhalt",
+  url = "",
+  domain = "memo",
   image,
   email,
   actionButtonText,
   lng,
 }: SendEmailParams): Promise<void> => {
-  const interactive = '#0076ff';
-  AWS.config.update({
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    region: 'eu-central-1',
+  const interactive = "#0076ff";
+  const sesClient = new SESv2Client({
+    region: "eu-central-1",
+    credentials:
+      process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+        ? {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          }
+        : undefined,
   });
 
-  const actionButtonTextWithLanguage = i18n.t(actionButtonText || 'Go to Application', { lng });
+  const actionButtonTextWithLanguage = i18n.t(
+    actionButtonText || "Go to Application",
+    { lng },
+  );
 
-  const ses: SES = new AWS.SES({ apiVersion: '2010-12-01' });
-
-  const toEmail = 'notifications@wirewire.de';
-  const base64ToName = Buffer.from(`Memo ${i18n.t('Notifications', { lng })}`).toString('base64');
+  const toEmail = "notifications@wirewire.de";
+  const base64ToName = Buffer.from(
+    `Memo ${i18n.t("Notifications", { lng })}`,
+  ).toString("base64");
   const finalToName = `=?UTF-8?B?${base64ToName}?= <${toEmail}>`;
 
-  const params: SES.SendEmailRequest = {
+  const params = {
     Destination: {
       ToAddresses: [email],
     },
-    ConfigurationSetName: 'memo-transactional',
-    Message: {
-      Body: {
-        Html: {
-          Charset: 'UTF-8',
-          Data: `
+    ConfigurationSetName: "memo-transactional",
+    Content: {
+      Simple: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
 <!DOCTYPE html>
 <html>
   <head>
@@ -537,7 +561,7 @@ export const sendEmail = async ({
             <tr>
               <td class="email-masthead">
                 <a href="https://${domain}.wirewire.de" class="f-fallback email-masthead_name">
-                 ${domain === 'memo' ? 'ANABOX smart' : 'paperlesspaper'}
+                 ${domain === "memo" ? "ANABOX smart" : "paperlesspaper"}
               </a>
               </td>
             </tr>
@@ -549,12 +573,14 @@ export const sendEmail = async ({
                   <tr>
                     <td class="content-cell align-center">
                       <div class="f-fallback">
-                      ${image ? `<img class="email-image" src="${image}" alt="memo image" />` : ''}
+                      ${image ? `<img class="email-image" src="${image}" alt="memo image" />` : ""}
                         <h1>${title}</h1>
                         <p>${body}</p>
                         <!-- Action -->
                         ${actionButton({
-                          link: urlStartsWithHttp(url) ? url : `http://${domain}.wirewire.de${url}`,
+                          link: urlStartsWithHttp(url)
+                            ? url
+                            : `http://${domain}.wirewire.de${url}`,
                           text: actionButtonTextWithLanguage,
                         })}
                       </div>
@@ -569,10 +595,10 @@ export const sendEmail = async ({
                   <tr>
                     <td class="content-cell" align="center">
                       <p class="f-fallback sub align-center">
-                        ${domain === 'web' ? 'The Wire UG' : 'wirewire GmbH'}
+                        ${domain === "web" ? "The Wire UG" : "wirewire GmbH"}
                         <a href="http://${domain}.wirewire.de/account">Account</a>
 
-                        ${config.env !== 'production' ? `<br/><br/>Environment: ${config.env}` : ''}
+                        ${config.env !== "production" ? `<br/><br/>Environment: ${config.env}` : ""}
                       </p>
                     </td>
                   </tr>
@@ -586,23 +612,24 @@ export const sendEmail = async ({
   </body>
 </html>
 `,
+          },
+          Text: {
+            Charset: "UTF-8",
+            Data: `${title} ${body}`,
+          },
         },
-        Text: {
-          Charset: 'UTF-8',
-          Data: `${title} ${body}`,
+        Subject: {
+          Charset: "UTF-8",
+          Data: `${title} - Memo App`,
         },
-      },
-      Subject: {
-        Charset: 'UTF-8',
-        Data: `${title} - Memo App`,
       },
     },
-    Source: finalToName,
+    FromEmailAddress: finalToName,
   };
 
   try {
-    const data = await ses.sendEmail(params).promise();
-    console.log('Email submitted to SES', data);
+    const data = await sesClient.send(new SendEmailCommand(params));
+    console.log("Email submitted to SES", data);
   } catch (error) {
     console.error(error);
   }

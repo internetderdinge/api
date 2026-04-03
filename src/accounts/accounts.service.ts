@@ -10,7 +10,7 @@ type Stock = any; // Replace with the actual Stock type if available
  * @returns {Promise<Stock>}
  */
 export const getAccountById = async (id: ObjectId): Promise<Stock> => {
-  return auth0.users.get({ id });
+  return auth0.users.get(id);
 };
 
 /**
@@ -54,7 +54,7 @@ export const updateMetaDataById = async (
   updateBody: Record<string, any>,
 ): Promise<Stock> => {
   // now use the generic update and pass app_metadata
-  return auth0.users.update({ id }, { app_metadata: updateBody });
+  return auth0.users.update(id, { app_metadata: updateBody });
 };
 
 /**
@@ -65,14 +65,14 @@ export const updateUserById = async (
   updateBody: Record<string, any>,
 ): Promise<Stock> => {
   // switch to the v3 ManagementClient users.update
-  return auth0.users.update({ id }, updateBody);
+  return auth0.users.update(id, updateBody);
 };
 
 /**
  * Delete user by id
  */
 export const deleteById = async (userId: ObjectId): Promise<Stock> => {
-  return auth0.users.delete({ id: userId });
+  return auth0.users.delete(userId);
 };
 
 export default {

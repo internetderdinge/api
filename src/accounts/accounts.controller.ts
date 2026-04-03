@@ -36,7 +36,7 @@ const getAccountById = catchAsync(
       throw new ApiError(httpStatus.NOT_FOUND, "Account not found");
     }
     res.send({
-      ...account.data,
+      ...account,
       notification: entryDeviceNotifications?.settings,
     });
   },
@@ -46,7 +46,7 @@ const setDeviceToken = catchAsync(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const account = await accountsService.getAccountById(req.auth.sub);
 
-    const devices: Device[] = account.data.app_metadata.devices || [];
+    const devices: Device[] = account.app_metadata.devices || [];
     const alreadyExisting = devices.find((d) => d.fck === req.body.token);
     if (!alreadyExisting) {
       devices.push({ fck: req.body.token });
@@ -74,7 +74,7 @@ const updateEntry = catchAsync(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const account = await accountsService.getAccountById(req.auth.sub);
 
-    const { isSocial } = account?.data.identities[0];
+    const { isSocial } = account.identities[0];
 
     const {
       given_name,
@@ -93,7 +93,7 @@ const updateEntry = catchAsync(
 
     const update = isSocial
       ? {
-          ...account.data.app_metadata,
+          ...account.app_metadata,
           ...updateBody,
           ...(hasGivenName ? { first_name: trimmedGivenName } : {}),
           ...(hasFamilyName ? { last_name: trimmedFamilyName } : {}),
@@ -136,7 +136,7 @@ const deleteCurrent = catchAsync(
 const current = catchAsync(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await accountsService.getAccountById(req.auth.sub);
-    res.send(user.data);
+    res.send(user);
   },
 );
 

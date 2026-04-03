@@ -9,6 +9,8 @@ interface User {
 // you can adjust the User source if your auth payload differs
 export const isAiRole = (user?: User): boolean => {
   if (!user) return false;
+
+  console.log("Checking AI role for user:", user);
   return user["https://memo.wirewire.de/roles"]?.includes("ai") ?? false;
 };
 

@@ -3,12 +3,6 @@ import dotenv from "dotenv";
 // Load env from the current working directory
 dotenv.config();
 
-console.log("Current working directory:", process.cwd());
-console.log("Loaded environment variables:", {
-  NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT,
-  MONGODB_URL: process.env.MONGODB_URL,
-});
 import Joi from "joi";
 
 const envVarsSchema = Joi.object()

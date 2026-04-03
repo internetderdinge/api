@@ -10,7 +10,6 @@ import {
   zDelete,
   zPagination,
 } from "../utils/zValidations.js";
-import { enable } from "agenda/dist/job/enable";
 
 extendZodWithOpenApi(z);
 
@@ -20,7 +19,7 @@ export const createEntrySchema = {
       name: z.string().optional(),
       deviceId: z.string().optional(),
       kind: z.string().optional(),
-      meta: z.record(z.any()).optional(),
+      meta: z.record(z.string(), z.any()).optional(),
       organization: zObjectId,
       patient: zObjectId.optional(),
       paper: zObjectId.optional().nullable(),
@@ -52,14 +51,14 @@ export const updateEntrySchema = {
     organization: zObjectId.optional(),
     patient: zObjectId.optional().nullable(),
     paper: zObjectId.optional().nullable(),
-    meta: z.record(z.any()).optional(),
-    iotDevice: z.record(z.any()).optional(),
+    meta: z.record(z.string(), z.any()).optional(),
+    iotDevice: z.record(z.string(), z.any()).optional(),
     shadow: z.union([z.string(), z.number()]).optional(),
     alarmEnable: z.number().int().optional(),
     takeOffsetTime: z.number().int().optional(),
     updatedAt: z.string().datetime().optional(),
     createdAt: z.string().datetime().optional(),
-    payment: z.record(z.any()).optional(),
+    payment: z.record(z.string(), z.any()).optional(),
     lut: z.string().optional(),
     sleepTime: z.string().optional(),
     clearScreen: z.boolean().optional(),
@@ -113,14 +112,6 @@ export const createDeviceSchema = {
 };
 export const deleteDeviceSchema = zDelete("deviceId");
 export const getDeviceSchema = zGet("deviceId");
-export const getImageSchema = {
-  params: z.object({
-    deviceId: zObjectIdFor("deviceId").openapi({
-      description: "Device ObjectId",
-    }),
-    uuid: z.string().openapi({ description: "Image UUID" }),
-  }),
-};
 export const ledLightSchema = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
@@ -203,17 +194,18 @@ export const registerDeviceSchema = {
       example: {
         enable: true,
         organization:
-          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID || "682fd0d7d4a6325d9d45b86d",
-        patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID ||
+          "682fd0d7d4a6325d9d45b86d",
+        patient:
+          process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
         paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || null,
       },
     }),
   params: z.object({
-    deviceId: (
-      process.env.SCHEMA_STRICT_EXAMPLES === "true" &&
-      process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL
-        ? z.literal(process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL)
-        : z.string()
+    deviceId: (process.env.SCHEMA_STRICT_EXAMPLES === "true" &&
+    process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL
+      ? z.literal(process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL)
+      : z.string()
     ).openapi({
       description: "Device serial",
       example: process.env.SCHEMA_EXAMPLE_DEVICE_SERIAL || "DEVICE-EXAMPLE",
@@ -225,7 +217,7 @@ export const queryDevicesSchema = {
   ...zPagination,
   query: zPagination.query.extend({
     patient: zObjectIdFor("patient").optional(),
-    organization: zObjectIdFor("organization"),
+    organization: zObjectIdFor("organization").optional(),
   }),
 };
 export const subscriptionSchema = {
@@ -237,8 +229,8 @@ export const uploadSingleImageFromWebsiteSchema = {};
 export const updateDeviceSchema = {
   ...zUpdate("deviceId"),
   body: zPatchBody({
-    intake: z.record(z.any()).optional(),
-    meta: z.record(z.any()).optional(),
+    intake: z.record(z.string(), z.any()).optional(),
+    meta: z.record(z.string(), z.any()).optional(),
     organization: zObjectId.optional(),
     patient: zObjectId.optional().nullable(),
     paper: zObjectId.optional().nullable(),
@@ -246,38 +238,7 @@ export const updateDeviceSchema = {
     deviceId: z.string().optional(),
     alarmEnable: z.number().int().optional(),
     takeOffsetTime: z.number().int().optional(),
-    iotDevice: z.record(z.any()).optional(),
-    payment: z.record(z.any()).optional(),
+    iotDevice: z.record(z.string(), z.any()).optional(),
+    payment: z.record(z.string(), z.any()).optional(),
   }),
-};
-
-export const updateSingleImageMetaSchema = {
-  params: z.object({
-    deviceId: zObjectIdFor("deviceId").openapi({
-      description: "Device ObjectId",
-    }),
-  }),
-  body: z
-    .object({
-      meta: z.record(z.any()).optional(),
-    })
-    .openapi({ description: "Image metadata updates" }),
-};
-export const uploadSingleImageSchema = {
-  params: z.object({
-    deviceId: zObjectIdFor("deviceId").openapi({
-      description: "Device ObjectId",
-    }),
-  }),
-  body: z
-    .object({
-      uuid: z
-        .string()
-        .optional()
-        .openapi({ description: "Optional image UUID", example: "mock-uuid" }),
-    })
-    .openapi({
-      description: "Multipart body is mocked during tests.",
-      example: { uuid: "mock-uuid" },
-    }),
 };

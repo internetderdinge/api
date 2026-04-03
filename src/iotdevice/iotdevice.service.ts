@@ -1,18 +1,16 @@
 // @ts-nocheck
 import httpStatus from "http-status";
 import axios from "axios";
-import AWS from "aws-sdk";
+import {
+  GetThingShadowCommand,
+  IoTDataPlaneClient,
+  UpdateThingShadowCommand,
+} from "@aws-sdk/client-iot-data-plane";
 import { deviceKindHasFeature } from "../utils/deviceUtils";
 import ApiError from "../utils/ApiError";
 import { getAuth0Token } from "../accounts/auth0.service";
-import {
-  uploadFile,
-  uploadImage,
-  getSignedFileUrl,
-} from "../files/upload.service";
-import { compareImages } from "../utils/comparePapers.service";
+import { getSignedFileUrl } from "../files/upload.service";
 import IotDevice from "./iotdevice.model";
-import { fileTypeFromBuffer } from "file-type";
 
 import type { AxiosRequestConfig } from "axios";
 import type { Device } from "../devices/devices.model.js";
@@ -26,76 +24,13 @@ export const SIMILARITY_THRESHOLD = Number(
   process.env.EPAPER_SIMILARITY_THRESHOLD ?? 99.995,
 );
 
-type UploadSingleImageParams = {
-  deviceName: string;
-  buffer: Buffer;
-  bufferOriginal?: Buffer;
-  bufferEditable?: Buffer;
-  id: string;
-};
+const IOT_DATA_ENDPOINT =
+  "https://a2vm6rc8xrtk10-ats.iot.eu-central-1.amazonaws.com";
 
-const buildUploadResponse = (
-  data: any,
-  similarityPercentage: number | null,
-  skippedUpload: boolean,
-) => {
-  return { /*...data,*/ key: data?.Key, similarityPercentage, skippedUpload };
-};
-
-const downloadPreviousOriginalImage = async (
-  id: string,
-): Promise<Buffer | null> => {
-  if (!id) {
-    return null;
-  }
-
-  try {
-    const signedUrl = await getSignedFileUrl({
-      fileName: `ePaperImages/${id}original.png`,
-    });
-    const response = await axios.get<ArrayBuffer>(signedUrl, {
-      responseType: "arraybuffer",
-    });
-    return Buffer.from(response.data);
-  } catch (error: any) {
-    console.warn(
-      `Unable to download previous image for ${id}:`,
-      error?.message || error,
-    );
-    return null;
-  }
-};
-
-const evaluateSimilarityBeforeUpload = async (
-  id: string,
-  bufferOriginal?: Buffer,
-): Promise<{ similarityPercentage: number | null; skipUpload: boolean }> => {
-  if (!bufferOriginal) {
-    return { similarityPercentage: null, skipUpload: false };
-  }
-
-  const previousBuffer = await downloadPreviousOriginalImage(id);
-  if (!previousBuffer) {
-    return { similarityPercentage: null, skipUpload: false };
-  }
-
-  try {
-    const similarityPercentage = await compareImages(
-      previousBuffer,
-      bufferOriginal,
-    );
-    return {
-      similarityPercentage,
-      skipUpload: similarityPercentage >= SIMILARITY_THRESHOLD,
-    };
-  } catch (error: any) {
-    console.warn(
-      `Similarity comparison failed for ${id}:`,
-      error?.message || error,
-    );
-    return { similarityPercentage: null, skipUpload: false };
-  }
-};
+const iotDataClient = new IoTDataPlaneClient({
+  endpoint: IOT_DATA_ENDPOINT,
+  region: process.env.AWS_REGION ?? "eu-central-1",
+});
 
 /**
  * Get events for a device
@@ -148,6 +83,11 @@ export const activateDevice = async (
   resetDevice = false,
 ): Promise<any> => {
   const accessToken = await getAuth0Token();
+
+  console.log(
+    `Activating device ${deviceId} for organization ${organization} with enable=${enable} and resetDevice=${resetDevice}`,
+  );
+  console.log(`Using access token: ${accessToken ? "Yes" : "No"}`);
 
   try {
     const data = {
@@ -391,20 +331,20 @@ export const getDeviceStatus = async (deviceName, kind) => {
  * @returns {Promise<Device>}
  */
 export const shadowAlarmGet = async (deviceName, shadowName) => {
-  const iotdata = new AWS.IotData({
-    endpoint: "a2vm6rc8xrtk10-ats.iot.eu-central-1.amazonaws.com",
-  });
-
   if (!deviceName) return { error: "deviceName is required" };
-  const params = {
-    thingName: deviceName,
-    shadowName,
-  };
 
   try {
-    const response = await iotdata.getThingShadow(params).promise();
+    const response = await iotDataClient.send(
+      new GetThingShadowCommand({
+        thingName: deviceName,
+        shadowName,
+      }),
+    );
 
-    return JSON.parse(response.payload);
+    const payload = response.payload
+      ? Buffer.from(response.payload).toString("utf8")
+      : "{}";
+    return JSON.parse(payload);
   } catch (e) {
     // console.log(deviceName, e);
     return "error";
@@ -441,96 +381,25 @@ export const ledLightHint = async (deviceName, body) => {
 const shadowAlarmUpdate = async (deviceName, alarms, shadowName) => {
   const data = alarms;
 
-  const iotdata = new AWS.IotData({
-    endpoint: "a2vm6rc8xrtk10-ats.iot.eu-central-1.amazonaws.com",
-  });
-
   if (!deviceName) {
     return { error: "no deviceId" };
   }
-  const params = {
-    payload: JSON.stringify(data),
-    thingName: deviceName,
-    shadowName,
-  };
 
   try {
-    const response = await iotdata.updateThingShadow(params).promise();
-    return JSON.parse(response.payload);
+    const response = await iotDataClient.send(
+      new UpdateThingShadowCommand({
+        payload: JSON.stringify(data),
+        thingName: deviceName,
+        shadowName,
+      }),
+    );
+
+    const payload = response.payload
+      ? Buffer.from(response.payload).toString("utf8")
+      : "{}";
+    return JSON.parse(payload);
   } catch (e) {
     return "error";
-  }
-};
-
-export const uploadSingleImage = async ({
-  deviceName,
-  buffer,
-  bufferOriginal,
-  bufferEditable,
-  id,
-  paperId,
-}: UploadSingleImageParams) => {
-  try {
-    const { skipUpload, similarityPercentage } =
-      await evaluateSimilarityBeforeUpload(id, bufferOriginal);
-    var response: any = {};
-
-    if (skipUpload) {
-      return buildUploadResponse(
-        { message: "Image skipped due to similarity threshold" },
-        similarityPercentage,
-        true,
-      );
-    }
-
-    if (!bufferOriginal) {
-      throw new Error("bufferOriginal is required to upload an image");
-    }
-
-    // console.log(`Uploading image for ${id} on ${deviceName}; similarity ${similarityPercentage?.toFixed(5)}%`);
-    if (deviceName) {
-      const accessToken = await getAuth0Token();
-
-      response = await axios.post(
-        `${process.env.IOT_API_URL_EPAPER}uploads`,
-        { deviceName },
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
-      if (!response.data.uploadURL) {
-        console.log("No upload URL received", response.data);
-      } else {
-        await axios.put(response.data.uploadURL, buffer, {
-          //  onUploadProgress: (progressEvent) => console.log('file progress', progressEvent.loaded),
-          headers: { "Content-Type": "text/octet-stream" },
-        });
-      }
-    }
-
-    const type = await fileTypeFromBuffer(buffer);
-    const fileName = `ePaperImages/${id}`;
-
-    await uploadImage({ blob: buffer, key: fileName + ".png", type });
-
-    await uploadImage({
-      blob: bufferOriginal,
-      key: fileName + "original.png",
-      type,
-    });
-
-    if (bufferEditable) {
-      await uploadImage({
-        blob: bufferEditable,
-        key: fileName + "editable.json",
-        type,
-      });
-    }
-
-    return buildUploadResponse(response.data, similarityPercentage, false);
-  } catch (error) {
-    console.error(error);
-    return null;
   }
 };
 
@@ -722,7 +591,6 @@ export default {
   deleteById,
   getApiStatus,
   getDevice,
-  uploadSingleImage,
   liveEventsWs,
   shadowAlarmGet,
   shadowAlarmUpdate,

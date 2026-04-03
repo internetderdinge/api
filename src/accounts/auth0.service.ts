@@ -21,6 +21,7 @@ let tokenManagementClient: TokenManagementClient = {
 };
 
 //if (config.env !== 'production') {
+/* 
 try {
   console.warn("Auth0 client: use local token from cache try");
   const token = readFileSync("./token.txt", "utf8");
@@ -28,7 +29,7 @@ try {
   tokenManagementClient = { token };
 } catch (error) {
   console.log("Auth0 Client: use new token");
-}
+} */
 //}
 
 // IoT Api
@@ -118,13 +119,14 @@ export const getAuth0Token = async (): Promise<string> => {
     // if (process.env.NODE_ENV !== 'production') {
     const fileToken = await loadTokenFromFile(TOKEN_FILE_PATH);
     if (fileToken && fileToken.expiresAt > now + TOKEN_BUFFER_SECONDS) {
+      console.warn("Auth0 Client: Using token from file cache");
       cachedToken = fileToken.token;
       tokenExpiresAt = fileToken.expiresAt;
       pendingTokenPromise = null;
       return cachedToken;
     }
-    //}
 
+    console.warn("Auth0 Client: Requesting new token from Auth0");
     const tokenResponse =
       await auth0AuthClient.oauth.clientCredentialsGrant(grantOpts);
     const expiresIn = tokenResponse.data.expires_in || 3600;
@@ -159,6 +161,7 @@ export const getAuth0ManagementToken = async (): Promise<string> => {
 
   pendingManagementTokenPromise = (async () => {
     const fileToken = await loadTokenFromFile(MANAGEMENT_TOKEN_FILE_PATH);
+
     if (fileToken && fileToken.expiresAt > now + TOKEN_BUFFER_SECONDS) {
       cachedManagementToken = fileToken.token;
       managementTokenExpiresAt = fileToken.expiresAt;
@@ -166,8 +169,10 @@ export const getAuth0ManagementToken = async (): Promise<string> => {
       return cachedManagementToken;
     }
 
+    console.warn("Auth0 Management Client: Requesting new token from Auth0");
     const tokenResponse =
       await auth0AuthClient.oauth.clientCredentialsGrant(grantOpts);
+
     const expiresIn = tokenResponse.data.expires_in || 3600;
     cachedManagementToken = tokenResponse.data.access_token;
     managementTokenExpiresAt = now + expiresIn;
@@ -192,27 +197,26 @@ export const auth0 = new ManagementClient({
 });
 
 export const getUserIdByEmail = async (email: string): Promise<User[]> => {
-  // use the users resource to look up by email
-  return auth0.usersByEmail.getByEmail({ email });
+  return auth0.users.listUsersByEmail({ email });
 };
 
 export const sendVerificationEmail = async (userID: string): Promise<any> => {
-  return auth0.jobs.verifyEmail({ user_id: userID });
+  return auth0.tickets.verifyEmail({ user_id: userID });
 };
 
 export const getUserById = async (userId: string): Promise<User> => {
-  return auth0.users.get({ id: userId });
+  return auth0.users.get(userId);
 };
 
 export const avatar = async (userId: string): Promise<User> => {
-  return auth0.users.get({ id: userId });
+  return auth0.users.get(userId);
 };
 
 export const mfaEnrollAccount = async (
   userId: string,
   mfaToken: string,
 ): Promise<any> => {
-  const ticketResponse = await auth0.guardian.createEnrollmentTicket({
+  const ticketResponse = await auth0.guardian.enrollments.createTicket({
     user_id: userId,
     send_mail: false,
   });
@@ -221,15 +225,15 @@ export const mfaEnrollAccount = async (
 };
 
 export const mfaDisableAccount = async (userId: string): Promise<any> => {
-  await auth0.users.deleteAuthenticationMethods({ id: userId });
+  await auth0.users.authenticationMethods.deleteAll(userId);
   return { success: true };
 };
 
 export const getUsersByIds = async (postIDs: string[]): Promise<User[]> => {
-  let q = "";
-  postIDs.forEach((e, i) => {
-    if (e) q = `${q} ${i >= 2 ? " OR " : ""} user_id:"${e}"`;
-  });
+  const userIds = postIDs.filter(Boolean);
+  if (!userIds.length) return [];
+
+  const q = userIds.map((id) => `user_id:"${id}"`).join(" OR ");
 
   const params = {
     search_engine: "v3",
@@ -238,7 +242,8 @@ export const getUsersByIds = async (postIDs: string[]): Promise<User[]> => {
     page: 0,
   };
 
-  return auth0.users.getAll(params);
+  const page = await auth0.users.list(params);
+  return page || [];
 };
 
 export default {

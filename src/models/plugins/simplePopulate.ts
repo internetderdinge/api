@@ -1,4 +1,4 @@
-function simplePopulate(populate: string): Record<string, any> {
+export function simplePopulate(populate: string): Record<string, any> {
   let docsPromise: Record<string, any> = {};
   populate.split(",").forEach((populateOption) => {
     docsPromise = populateOption

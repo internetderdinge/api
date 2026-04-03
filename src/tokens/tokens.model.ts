@@ -21,7 +21,6 @@ tokenSchema.plugin(toJSON, true);
 tokenSchema.plugin(paginate);
 
 const Token: Model<any> =
-  (mongoose.models.Token as Model<any>) ||
-  mongoose.model("Token", tokenSchema);
+  (mongoose.models.Token as Model<any>) || mongoose.model("Token", tokenSchema);
 
 export default Token;

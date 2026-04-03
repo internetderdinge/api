@@ -17,13 +17,13 @@ export const eventResponseSchema = z.object({
   id: z.string(),
   deviceId: z.string(),
   type: z.string(),
-  payload: z.record(z.any()),
+  payload: z.record(z.string(), z.any()),
   timestamp: z.string(), // ISO timestamp
   // ...other event fields...
 });
 
 export const genericResponseSchema = z
-  .record(z.any())
+  .record(z.string(), z.any())
   .openapi({ description: "Generic response payload" });
 
 export const imageResponseSchema = z.object({

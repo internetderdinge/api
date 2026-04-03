@@ -5,20 +5,36 @@ import mongoose from "mongoose";
 
 export const zPagination = {
   query: z.object({
-    name: z.string().optional(),
+    name: z
+      .string()
+      .openapi({
+        example: "John",
+        description: "Name to filter by",
+        param: { name: "name", in: "query" },
+      })
+      .optional(),
     role: z
       .string()
-      .openapi({ example: "admin", description: "Role to filter by" })
+      .openapi({
+        example: "admin",
+        description: "Role to filter by",
+        param: { name: "role", in: "query" },
+      })
       .optional(),
     sortBy: z
       .string()
-      .openapi({ example: "createdAt", description: "Field to sort by" })
+      .openapi({
+        example: "createdAt",
+        description: "Field to sort by",
+        param: { name: "sortBy", in: "query" },
+      })
       .optional(),
     search: z
       .string()
       .openapi({
         example: process.env.SCHEMA_EXAMPLE_SEARCH || "",
         description: "Search term to filter results",
+        param: { name: "search", in: "query" },
       })
       .optional(),
     limit: z.coerce
@@ -26,6 +42,7 @@ export const zPagination = {
       .openapi({
         example: 10,
         description: "Number of items per page",
+        param: { name: "limit", in: "query" },
       })
       .int()
       .min(1)
@@ -36,6 +53,7 @@ export const zPagination = {
       .openapi({
         example: 0,
         description: "Offset for pagination, used to skip a number of items",
+        param: { name: "offset", in: "query" },
       })
       .int()
       .min(0)
@@ -47,6 +65,7 @@ export const zPagination = {
       .openapi({
         example: 1,
         description: "Page number for pagination",
+        param: { name: "page", in: "query" },
       })
       .min(1)
       .max(100000)

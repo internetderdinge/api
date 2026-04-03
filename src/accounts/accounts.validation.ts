@@ -22,7 +22,7 @@ export const createAccountSchema = {
     organization: zObjectId.openapi({ description: "Organization ObjectId" }),
     patient: zObjectId.openapi({ description: "Patient ObjectId" }),
     meta: z
-      .record(z.any())
+      .record(z.string(), z.any())
       .openapi({
         example: { key: "value" },
         description: "Additional metadata for the entry",
@@ -35,25 +35,21 @@ export const getUsersSchema = zPagination;
 
 export const getAccountSchema = {
   params: z.object({
-    accountId: z
-      .string()
-      .openapi({
-        example:
-          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
-        description: "Auth Account ID",
-      }),
+    accountId: z.string().openapi({
+      example:
+        process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
+      description: "Auth Account ID",
+    }),
   }),
 };
 
 export const updateAccountSchema = {
   params: z.object({
-    accountId: z
-      .string()
-      .openapi({
-        example:
-          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
-        description: "Auth Account ID",
-      }),
+    accountId: z.string().openapi({
+      example:
+        process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
+      description: "Auth Account ID",
+    }),
   }),
   body: zPatchBody({
     language: z
@@ -67,9 +63,10 @@ export const updateAccountSchema = {
       .optional()
       .openapi({ example: "female", description: "Gender" }),
     email: z
-      .string()
-      .email()
-      .optional()
+      .preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.string().email().optional(),
+      )
       .openapi({ description: "User email address" }),
     given_name: z
       .string()
@@ -82,7 +79,7 @@ export const updateAccountSchema = {
     debug: z.boolean().optional(),
     demo: z.boolean().optional(),
     notification: z
-      .record(z.any())
+      .record(z.string(), z.any())
       .optional()
       .openapi({ description: "Notification settings object" }),
   }),
@@ -90,13 +87,11 @@ export const updateAccountSchema = {
 
 export const deleteEntrySchema = {
   params: z.object({
-    accountId: z
-      .string()
-      .openapi({
-        example:
-          process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
-        description: "Auth Account ID",
-      }),
+    accountId: z.string().openapi({
+      example:
+        process.env.SCHEMA_EXAMPLE_ACCOUNT_ID || "auth0|60452f4c0dc85b0062326",
+      description: "Auth Account ID",
+    }),
   }),
 };
 

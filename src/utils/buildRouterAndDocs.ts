@@ -69,8 +69,6 @@ export default function buildAiRouterAndDocs(
       };
     }
 
-    // console.log('spec.requestSchema', body);
-
     if (
       spec.responseSchema &&
       !hasRoleValidation(spec.validate) &&

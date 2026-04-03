@@ -4,7 +4,7 @@ import userService from "../users/users.service";
 
 import type { Request, Response, NextFunction } from "express";
 
-const getCurrentUser = async (
+export const validateCurrentUser = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -32,4 +32,4 @@ const getCurrentUser = async (
   }
 };
 
-export default getCurrentUser;
+export default validateCurrentUser;

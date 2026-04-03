@@ -1,5 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
 import buildRouterAndDocs from "../utils/buildRouterAndDocs.js";
 import type { RouteSpec } from "../types/routeSpec";
 import auth from "../middlewares/auth.js";
@@ -23,9 +22,6 @@ import {
   registerDeviceSchema,
   ledLightSchema,
   rebootDeviceSchema,
-  getImageSchema,
-  updateSingleImageMetaSchema,
-  uploadSingleImageSchema,
   resetDeviceSchema,
 } from "./devices.validation.js";
 import {
@@ -33,8 +29,6 @@ import {
   devicesResponseSchema,
   eventResponseSchema,
   genericResponseSchema,
-  imageResponseSchema,
-  uploadResponseSchema,
   resetResponseSchema,
 } from "./devices.schemas.js";
 import {
@@ -94,6 +88,20 @@ export const devicesRouteSpecs: RouteSpec[] = [
   {
     method: "post",
     path: "/:deviceId",
+    validate: [auth("manageUsers"), validateDevice, validateOrganizationUpdate],
+    requestSchema: updateDeviceSchema,
+    responseSchema: deviceResponseSchema,
+    handler: devicesController.updateEntry,
+    summary: "Update a device",
+    description:
+      "Modify the properties of an existing device identified by its ID.",
+  },
+  {
+    method: "delete",
+    path: "/:deviceId",
+    validate: [auth("manageUsers"), validateDevice, validateOrganizationDelete],
+    requestSchema: deleteDeviceSchema,
+    responseSchema: genericResponseSchema,
     handler: devicesController.deleteEntry,
     summary: "Delete a device",
     description: "Remove the specified device from the system.",
@@ -156,39 +164,6 @@ export const devicesRouteSpecs: RouteSpec[] = [
     handler: devicesController.rebootDevice,
     summary: "Reboot a device",
     description: "Initiate a remote reboot of the specified device.",
-  },
-  {
-    method: "get",
-    path: "/image/:deviceId/:uuid",
-    validate: [auth("getUsers"), validateDevice],
-    requestSchema: getImageSchema,
-    responseSchema: imageResponseSchema,
-    handler: devicesController.getImageById,
-    summary: "Fetch an image by UUID",
-    description:
-      "Download a previously uploaded image for the device by its UUID.",
-  },
-  {
-    method: "post",
-    path: "/updateSingleImageMeta/:deviceId",
-    validate: [auth("getUsers"), validateDevice],
-    requestSchema: updateSingleImageMetaSchema,
-    responseSchema: uploadResponseSchema,
-    handler: devicesController.updateSingleImageMeta,
-    summary: "Update image metadata",
-    description:
-      "Modify metadata (e.g., title, tags) for an existing device image.",
-  },
-  {
-    method: "post",
-    path: "/uploadSingleImage/:deviceId",
-    validate: [auth("getUsers"), multer().array("picture", 2), validateDevice],
-    requestSchema: uploadSingleImageSchema,
-    responseSchema: uploadResponseSchema,
-    handler: devicesController.uploadSingleImage,
-    summary: "Upload one or two images",
-    description:
-      "Upload up to two image files to the device for processing or storage.",
   },
 ];
 

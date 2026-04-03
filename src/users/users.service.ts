@@ -149,7 +149,9 @@ export const getUserByOwner = async (
 ): Promise<any | null> => {
   const user = await User.findOne({ owner, organization });
   if (!user) return null;
+
   const auth0User = await populateAuth0User(user);
+
   const json = user.toJSON();
   json.auth0User = auth0User;
   return json;
@@ -404,6 +406,7 @@ export default {
   sendEmail,
   populateAuth0User,
   populateAuth0Users,
+  setUpdateTimesByIdHook,
 };
 
 export type UserService = typeof import("./users.service");

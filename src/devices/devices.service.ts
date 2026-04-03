@@ -5,7 +5,6 @@ import ApiError from "../utils/ApiError.js";
 import iotDevicesService from "../iotdevice/iotdevice.service.js";
 
 import { promisify } from "util";
-import { getSignedFileUrl } from "../files/upload.service";
 import { deviceByDeviceName, deviceKindHasFeature } from "../utils/deviceUtils";
 
 import type { DeviceDocument, DeviceInput } from "./devices.model.js";
@@ -107,15 +106,6 @@ export const populateDeviceStatus = async (e: {
   return deviceStatus;
 };
 
-export const populateDeviceImage = async (
-  deviceId: string,
-  uuid: string,
-): Promise<string> => {
-  const fileName = `ePaperImages/${deviceId}+${uuid}.png`;
-  const url = await getSignedFileUrl({ fileName });
-  return url;
-};
-
 export const populateIotDevices = async (
   data: DeviceDocument[],
 ): Promise<any[]> => {
@@ -152,14 +142,6 @@ export const getById = async (id: string): Promise<DeviceDocument> => {
   const device = await Device.findById(id);
   //if (!device) throw new ApiError(httpStatus.NOT_FOUND, `Device not found id: ${id}`);
   return device;
-};
-
-export const getImageById = async (
-  id: string,
-  uuid: string,
-): Promise<{ url: string }> => {
-  const url = await populateDeviceImage(id, uuid);
-  return { url };
 };
 
 export const getByIdWithIoT = async (id: string): Promise<any> => {
@@ -238,24 +220,6 @@ export const updateById = async (
   return deviceJSON;
 };
 
-export const updateSingleImageMeta = async (
-  deviceId: string,
-  shadowNew: any,
-): Promise<any> => {
-  const shadowBody = {
-    state: {
-      reported: shadowNew,
-    },
-  };
-
-  const shadowResult = await iotDevicesService.shadowAlarmUpdate(
-    deviceId,
-    shadowBody,
-    "settings",
-  );
-  return shadowResult;
-};
-
 export const deleteById = async (
   userId: string,
   deleteFromIotApi = true,
@@ -305,12 +269,10 @@ export default {
   getByIdWithIoT,
   getDeviceByUserId,
   getDeviceByDeviceId,
-  getImageById,
   updateById,
   updatePaymentById,
   deleteById,
   populateIotDevices,
-  populateDeviceImage,
   populateDeviceStatus,
   queryDevicesByUser,
   registerDevice,
