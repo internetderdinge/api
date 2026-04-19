@@ -28,7 +28,14 @@ export { default as devicesNotificationsRoute } from "./devicesNotifications/dev
 export { default as devicesNotificationsService } from "../src/devicesNotifications/devicesNotifications.service";
 export { default as iotDevicesService } from "../src/iotdevice/iotdevice.service";
 export { default as iotdeviceRoute } from "../src/iotdevice/iotdevice.route";
-export { SIMILARITY_THRESHOLD } from "../src/iotdevice/iotdevice.service";
+export {
+  SIMILARITY_THRESHOLD,
+  alarmsDevice,
+  getDeviceStatus,
+  getDeviceStatusList,
+  shadowAlarmGet,
+  shadowAlarmUpdate,
+} from "../src/iotdevice/iotdevice.service";
 export { default as pdfRoute } from "../src/pdf/pdf.route";
 export { default as tokensRoute } from "../src/tokens/tokens.route";
 export * from "../src/tokens/tokens.service";

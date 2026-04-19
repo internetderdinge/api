@@ -378,7 +378,7 @@ export const ledLightHint = async (deviceName, body) => {
  * @param {Object} userBody
  * @returns {Promise<Device>}
  */
-const shadowAlarmUpdate = async (deviceName, alarms, shadowName) => {
+export const shadowAlarmUpdate = async (deviceName, alarms, shadowName) => {
   const data = alarms;
 
   if (!deviceName) {
