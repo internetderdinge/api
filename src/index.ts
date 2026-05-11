@@ -15,6 +15,7 @@ export { default as i18n } from "../src/i18n/i18n";
 export { default as usersRoute } from "../src/users/users.route";
 export { default as usersService } from "../src/users/users.service";
 export { default as accountsRoute } from "../src/accounts/accounts.route";
+export { default as adminSearchRoute } from "../src/admin/adminSearch.route";
 export { default as accountsService } from "../src/accounts/accounts.service";
 export { auth0 } from "../src/accounts/auth0.service";
 export { default as organizationsRoute } from "../src/organizations/organizations.route";

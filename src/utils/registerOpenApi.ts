@@ -6,6 +6,17 @@ extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
 
+export const xApiKey = registry.registerComponent(
+  "securitySchemes",
+  "x-api-key",
+  {
+    type: "apiKey",
+    in: "header",
+    name: "x-api-key",
+    description: "API key for authentication",
+  },
+);
+
 // add Bearer JWT auth
 export const bearerAuth = registry.registerComponent(
   "securitySchemes",
@@ -18,17 +29,6 @@ export const bearerAuth = registry.registerComponent(
   },
 );
 
-export const xApiKey = registry.registerComponent(
-  "securitySchemes",
-  "x-api-key",
-  {
-    type: "apiKey",
-    in: "header",
-    name: "x-api-key",
-    description: "API key for authentication",
-  },
-);
-
 const UserSchema = z
   .object({
     id: z.string().openapi({ example: "1212121" }),
@@ -37,26 +37,7 @@ const UserSchema = z
   })
   .openapi("User");
 
-registry.registerPath({
-  method: "get",
-  path: "/usersnnn/{id}",
-  summary: "Get a single user",
-  request: {
-    params: z.object({ id: z.string() }),
-  },
-
-  responses: {
-    200: {
-      description: "Object with user data.",
-      content: {
-        "application/json": {
-          schema: UserSchema,
-        },
-      },
-    },
-  },
-});
-
+/*
 registry.registerPath({
   method: "get",
   path: "/users/{id}",
@@ -81,3 +62,4 @@ registry.registerPath({
     },
   },
 });
+*/

@@ -40,6 +40,7 @@ import {
   getApiStatus,
   getEntry,
   updateEntry,
+  ledLightHint,
 } from "./iotdevice.controller";
 import { request } from "https";
 
@@ -113,7 +114,7 @@ export const iotdeviceRouteSpecs: RouteSpec[] = [
     path: "/ledlight/:deviceId",
     validate: [auth("getUsers"), validateAdmin],
     responseSchema: pingResponseSchema,
-    handler: pingDevice,
+    handler: ledLightHint,
     summary: "Ping device LED light",
     description:
       "Sends a ping to the device’s LED light to test its connectivity or response.",

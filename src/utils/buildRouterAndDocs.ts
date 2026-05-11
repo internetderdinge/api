@@ -21,6 +21,10 @@ export type RouteSpec = {
   validate?: RequestHandler<any, any, any, any, any>[];
   validateWithRequestSchema?: RequestHandler<any, any, any, any, any>[];
   requestSchema?: Partial<Record<string, ZodTypeAny>>;
+  requestBody?: {
+    required?: boolean;
+    content: Record<string, { schema: ZodTypeAny }>;
+  };
   responseSchema?: ZodTypeAny;
   handler: RequestHandler<any, any, any, any, any>;
   summary: string;
@@ -36,31 +40,22 @@ export default function buildAiRouterAndDocs(
   tags: string[] = [],
 ) {
   routeSpecs.forEach((spec) => {
-    // mount Express
+    const validate = spec.validate || [];
+    const routeMiddleware =
+      spec.validateWithRequestSchema ||
+      (spec.requestSchema
+        ? [validateZod(spec.requestSchema), ...validate]
+        : validate);
 
-    if (!spec.validate) {
-      spec.validate = [];
-    }
+    router[spec.method](spec.path, ...routeMiddleware, spec.handler);
 
-    if (spec.requestSchema) {
-      spec.validateWithRequestSchema = [
-        validateZod(spec.requestSchema),
-        ...spec.validate,
-      ];
-    }
+    const { body, ...rest } = spec.requestSchema || {};
+    const request = { ...rest } as Record<string, unknown>;
 
-    if (spec.validateWithRequestSchema) {
-      router[spec.method](
-        spec.path,
-        ...spec.validateWithRequestSchema,
-        spec.handler,
-      );
-    }
-
-    var { body, ...rest } = spec.requestSchema || {};
-
-    if (body) {
-      rest.body = {
+    if (spec.requestBody) {
+      request.body = spec.requestBody;
+    } else if (body) {
+      request.body = {
         content: {
           "application/json": {
             schema: body,
@@ -71,12 +66,12 @@ export default function buildAiRouterAndDocs(
 
     if (
       spec.responseSchema &&
-      !hasRoleValidation(spec.validate) &&
+      !hasRoleValidation(spec.validateWithRequestSchema || validate) &&
       spec.privateDocs !== true &&
       spec.memoOnly !== true
     ) {
       // collect all middleware fn names (falls back to '<anonymous>' if unnamed)
-      const middlewareNames = (spec.validate || []).map(
+      const middlewareNames = (spec.validateWithRequestSchema || validate).map(
         (fn) => `\`${fn.name}\`` || "<anonymous>",
       );
       const openApiPath = (basePath + spec.path).replace(
@@ -88,7 +83,7 @@ export default function buildAiRouterAndDocs(
         method: spec.method,
         path: openApiPath,
         summary: spec.summary,
-        request: rest,
+        request,
 
         // append middleware names to the description
         description: [

@@ -2,10 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import dotenv from "dotenv";
 import semver from "semver";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
+dotenv.config({ path: path.join(repoRoot, ".env") });
 
 const args = process.argv.slice(2);
 const shouldPublish = !args.includes("--no-publish");
@@ -44,12 +46,23 @@ const resolveNextVersion = (current, input) => {
   );
 };
 
-const resolvePaperlesspaperWebRoot = () => {
-  if (process.env.PAPERLESSPAPER_WEB_PATH) {
-    return path.resolve(process.env.PAPERLESSPAPER_WEB_PATH);
+const resolveUpdatePackagePaths = () => {
+  const updatePaths = process.env.UPDATE_PATHS?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (!updatePaths?.length) {
+    throw new Error(
+      "UPDATE_PATHS must be set in .env to a comma-separated list of package.json paths.",
+    );
   }
 
-  return path.resolve(repoRoot, "../../paperlesspaper-web");
+  return updatePaths.map((updatePath) => {
+    const resolvedPath = path.resolve(repoRoot, updatePath);
+    return path.basename(resolvedPath) === "package.json"
+      ? resolvedPath
+      : path.join(resolvedPath, "package.json");
+  });
 };
 
 const updateDependencyVersion = (
@@ -88,8 +101,9 @@ const updateDependencyVersion = (
     currentDependencyVersion &&
     currentDependencyVersion !== expectedVersion
   ) {
+    const packageName = path.basename(path.dirname(packageJsonPath));
     throw new Error(
-      `paperlesspaper-api dependency is ${currentRange} (expected ${expectedVersion}). Update it before bumping.`,
+      `${packageName} dependency is ${currentRange} (expected ${expectedVersion}). Update it before bumping.`,
     );
   }
 
@@ -117,34 +131,33 @@ if (!cleanedCurrent) {
 }
 
 const nextVersion = resolveNextVersion(currentVersion, versionInput);
+const updatePackagePaths = resolveUpdatePackagePaths();
+
+for (const updatePackagePath of updatePackagePaths) {
+  if (!fs.existsSync(updatePackagePath)) {
+    throw new Error(`Could not find package.json: ${updatePackagePath}`);
+  }
+}
 
 apiPackage.version = nextVersion;
 writeJson(apiPackagePath, apiPackage);
 
 if (shouldPublish) {
+  // Always publish through npm, regardless of the package manager used to run this script.
   execSync("npm publish", { cwd: repoRoot, stdio: "inherit" });
 }
 
-const paperlesspaperRoot = resolvePaperlesspaperWebRoot();
-const paperlessApiPath = path.join(
-  paperlesspaperRoot,
-  "packages/paperlesspaper-api/package.json",
-);
-
-if (!fs.existsSync(paperlessApiPath)) {
-  throw new Error(
-    "Could not find paperlesspaper-api package.json. Set PAPERLESSPAPER_WEB_PATH to the repo root.",
-  );
-}
-
-const paperlessUpdate = updateDependencyVersion(
-  paperlessApiPath,
-  "@internetderdinge/api",
-  nextVersion,
-  cleanedCurrent,
-);
+const updates = updatePackagePaths.map((updatePackagePath) => ({
+  packageName: readJson(updatePackagePath).name,
+  ...updateDependencyVersion(
+    updatePackagePath,
+    "@internetderdinge/api",
+    nextVersion,
+    cleanedCurrent,
+  ),
+}));
 
 console.log(`Updated @internetderdinge/api to ${nextVersion}`);
-console.log(
-  `paperlesspaper-api: ${paperlessUpdate.previous} -> ${paperlessUpdate.next}`,
-);
+for (const update of updates) {
+  console.log(`${update.packageName}: ${update.previous} -> ${update.next}`);
+}
