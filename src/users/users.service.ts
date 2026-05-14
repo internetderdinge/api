@@ -7,6 +7,7 @@ import ApiError from "../utils/ApiError.js";
 import auth0Service from "../accounts/auth0.service";
 import organizationsService from "../organizations/organizations.service";
 import { sendEmail } from "../email/email.service";
+import type { SendEmailParams } from "../email/email.service";
 import i18n from "../i18n/i18n";
 
 export type UpdateTimesByIdHook = (
@@ -19,6 +20,27 @@ let updateTimesByIdHook: UpdateTimesByIdHook | null = null;
 
 export const setUpdateTimesByIdHook = (hook?: UpdateTimesByIdHook): void => {
   updateTimesByIdHook = hook ?? null;
+};
+
+export type BuildInviteEmailParams = {
+  auth: { sub: string };
+  user: IUserDocument;
+  inviteCode: string;
+  email: string;
+  organization: any;
+  lng: string;
+};
+
+export type BuildInviteEmailHook = (
+  params: BuildInviteEmailParams,
+) => Partial<SendEmailParams>;
+
+let buildInviteEmailHook: BuildInviteEmailHook | null = null;
+
+export const setBuildInviteEmailHook = (
+  hook?: BuildInviteEmailHook,
+): void => {
+  buildInviteEmailHook = hook ?? null;
 };
 
 /**
@@ -100,14 +122,13 @@ export const getByIdWithAuth0 = async (id: string): Promise<any | null> => {
   return json;
 };
 
-/**
- * Get all users in a given category (and optional organization)
- */
-export const getUsersByCategory = async (
-  category: string,
+export const getUsersByAppField = async (
+  appName: string,
+  fieldName: string,
+  value: unknown,
   organization?: string,
 ): Promise<IUserDocument[]> => {
-  const filter: any = { category };
+  const filter: any = { [`apps.${appName}.${fieldName}`]: value };
   if (organization) filter.organization = organization;
   return User.find(filter);
 };
@@ -182,21 +203,35 @@ export const sendInviteEmail = async (params: {
   const auth0User = await auth0Service.getUserById(auth.sub);
   const lng = auth0User.data?.app_metadata?.language as string | "en";
 
-  const title = `${i18n.t("Invite to ", { lng })}${
-    organization.kind === "private-wirewire" ? "paperlesspaper" : "ANABOX smart"
-  }`;
   const body = i18n.t(
     "You have been invited to join the group. Click on the link to accept the invitation.",
     { lng },
   );
-
-  await sendEmail({
-    title,
+  const baseEmail: SendEmailParams = {
+    title: `${i18n.t("Invite to ", { lng })}${
+      organization?.name || "Application"
+    }`,
     body,
     url: `/${user.organization}/invite/${inviteCode}`,
     actionButtonText: "Accept invite",
-    domain: organization.kind === "private-wirewire" ? "web" : "memo",
+    domain: "web",
+    productName: organization?.name || "Application",
     email,
+    lng,
+  };
+
+  await sendEmail({
+    ...baseEmail,
+    ...(buildInviteEmailHook
+      ? buildInviteEmailHook({
+          auth,
+          user,
+          inviteCode,
+          email,
+          organization,
+          lng,
+        })
+      : {}),
   });
 };
 
@@ -384,7 +419,7 @@ export default {
   createCurrentUser,
   getById,
   getByIdWithAuth0,
-  getUsersByCategory,
+  getUsersByAppField,
   getUsersByOrganization,
   getUsersByOrganizationAndId,
   getUsersByOwner,
@@ -407,6 +442,7 @@ export default {
   populateAuth0User,
   populateAuth0Users,
   setUpdateTimesByIdHook,
+  setBuildInviteEmailHook,
 };
 
 export type UserService = typeof import("./users.service");

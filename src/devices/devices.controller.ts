@@ -195,17 +195,6 @@ export const resetDevice = catchAsync(
   },
 );
 
-const ledLight = catchAsync(
-  async (req: Request, res: Response): Promise<void> => {
-    const device = await devicesService.getByIdWithIoT(req.params.deviceId);
-    const ping = await iotDevicesService.ledLightHint(
-      device.deviceId,
-      req.body,
-    );
-    res.send({ device, ping });
-  },
-);
-
 const rebootDevice = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const device = await devicesService.getByIdWithIoT(req.params.deviceId);
@@ -221,7 +210,6 @@ export {
   getEvents,
   registerDevice,
   pingDevice,
-  ledLight,
   rebootDevice,
   getEntry,
   updateEntry,

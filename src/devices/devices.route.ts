@@ -20,7 +20,6 @@ import {
   getEventsSchema,
   pingDeviceSchema,
   registerDeviceSchema,
-  ledLightSchema,
   rebootDeviceSchema,
   resetDeviceSchema,
 } from "./devices.validation.js";
@@ -132,18 +131,6 @@ export const devicesRouteSpecs: RouteSpec[] = [
     summary: "Register a device",
     description:
       "Associate an existing device with the authenticated organization.",
-  },
-  {
-    method: "post",
-    path: "/ledlight/:deviceId",
-    validate: [auth("getUsers"), validateDevice],
-    requestSchema: ledLightSchema,
-    responseSchema: genericResponseSchema,
-    handler: devicesController.ledLight,
-    summary: "Set LED light on device",
-    description:
-      "Turn the device’s LED on or off, or set its color/brightness.",
-    memoOnly: true,
   },
   {
     method: "get",

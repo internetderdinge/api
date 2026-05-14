@@ -12,18 +12,49 @@ import { filterOptions } from "../utils/filterOptions.js";
 
 const ObjectId = mongoose.Types.ObjectId;
 
+export type CreateOrganizationOwnerUserParams = {
+  organization: any;
+  owner: string;
+  request: Request;
+};
+
+export type CreateOrganizationOwnerUserHook = (
+  params: CreateOrganizationOwnerUserParams,
+) => Record<string, any>;
+
+let createOrganizationOwnerUserHook: CreateOrganizationOwnerUserHook | null =
+  null;
+
+export const setCreateOrganizationOwnerUserHook = (
+  hook?: CreateOrganizationOwnerUserHook,
+): void => {
+  createOrganizationOwnerUserHook = hook ?? null;
+};
+
+const createOrganizationOwnerUserBody = (
+  params: CreateOrganizationOwnerUserParams,
+) => ({
+  organization: params.organization._id,
+  owner: params.owner,
+  role: "admin",
+  status: "accept",
+  ...(createOrganizationOwnerUserHook
+    ? createOrganizationOwnerUserHook(params)
+    : {}),
+});
+
 export const createOrganization = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const organization = await organizationsService.createOrganization(
       req.body,
     );
-    const user = await usersService.createUser({
-      organization: organization._id,
-      owner: res.req.auth.sub,
-      role: "admin",
-      category: "relative",
-      status: "accept",
-    });
+    const user = await usersService.createUser(
+      createOrganizationOwnerUserBody({
+        organization,
+        owner: res.req.auth.sub,
+        request: req,
+      }),
+    );
     res.status(httpStatus.CREATED).send(organization);
   },
 );

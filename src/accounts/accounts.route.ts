@@ -62,7 +62,7 @@ export const accountsRouteSpecs: RouteSpec[] = [
   },
   {
     method: "delete",
-    path: "/deleteCurrent",
+    path: "/current",
     validate: [auth("manageUsers")],
     requestSchema: accountsValidation.deleteCurrentSchema,
     responseSchema: accountResponseSchema,
@@ -70,6 +70,18 @@ export const accountsRouteSpecs: RouteSpec[] = [
     summary: "Delete the current user's account",
     description:
       "Permanently deletes the current user's account. Will not delete associated data. This action is irreversible.",
+  },
+  {
+    method: "delete",
+    path: "/deleteCurrent",
+    validate: [auth("manageUsers")],
+    requestSchema: accountsValidation.deleteCurrentSchema,
+    responseSchema: accountResponseSchema,
+    handler: accountsController.deleteCurrent,
+    summary: "Delete the current user's account",
+    privateDocs: true,
+    description:
+      "LEGACY: Permanently deletes the current user's account. Will not delete associated data. This action is irreversible. (Replaced by DELETE /current)",
   },
   {
     method: "get",

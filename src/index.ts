@@ -13,12 +13,16 @@ export {
 export { initI18n } from "../src/i18n/i18n";
 export { default as i18n } from "../src/i18n/i18n";
 export { default as usersRoute } from "../src/users/users.route";
+export * from "../src/users/users.route";
 export { default as usersService } from "../src/users/users.service";
+export * from "../src/users/users.service";
+export * from "../src/users/users.validation";
 export { default as accountsRoute } from "../src/accounts/accounts.route";
 export { default as adminSearchRoute } from "../src/admin/adminSearch.route";
 export { default as accountsService } from "../src/accounts/accounts.service";
 export { auth0 } from "../src/accounts/auth0.service";
 export { default as organizationsRoute } from "../src/organizations/organizations.route";
+export * from "../src/organizations/organizations.controller";
 export { default as organizationsService } from "../src/organizations/organizations.service";
 export { default as Organization } from "../src/organizations/organizations.model";
 export { default as devicesRoute } from "../src/devices/devices.route";
@@ -37,11 +41,11 @@ export {
   shadowAlarmGet,
   shadowAlarmUpdate,
 } from "../src/iotdevice/iotdevice.service";
-export { default as pdfRoute } from "../src/pdf/pdf.route";
 export { default as tokensRoute } from "../src/tokens/tokens.route";
 export * from "../src/tokens/tokens.service";
 export { default as Token } from "../src/tokens/tokens.model";
 export { User } from "../src/users/users.model";
+export * from "../src/users/users.model";
 export { isAdmin, validateAdmin } from "../src/middlewares/validateAdmin";
 export { sendEmail } from "../src/email/email.service";
 export { default as catchAsync } from "../src/utils/catchAsync";

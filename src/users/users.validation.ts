@@ -14,37 +14,39 @@ import {
 
 extendZodWithOpenApi(z);
 
-export const createUserSchema = {
-  body: z.object({
-    meta: z
-      .object({})
-      .passthrough()
-      .optional()
-      .openapi({
-        example: { key: "value" },
-        description: "Additional metadata for the user",
-      }),
-    organization: zObjectId.openapi({
-      description: "Organization ObjectId",
+export const userAppsSchema = z
+  .record(z.string(), z.unknown())
+  .optional()
+  .openapi({ description: "Application-specific user fields" });
+
+export const createUserBodyShape = {
+  meta: z
+    .object({})
+    .passthrough()
+    .optional()
+    .openapi({
+      example: { key: "value" },
+      description: "Additional metadata for the user",
     }),
-    email: z.string().email().optional().nullable().openapi({
-      example: "user@example.com",
-      description: "User email address",
-    }),
-    timezone: z.string().optional().openapi({
-      example: "Europe/Berlin",
-      description: "IANA timezone string",
-    }),
-    role: z.enum(["user", "admin", "patient", "onlyself"]).optional().openapi({
-      description: "Role assigned to the user",
-    }),
-    category: z
-      .enum(["doctor", "nurse", "patient", "pharmacist", "relative"])
-      .optional()
-      .openapi({
-        description: "Category of the user",
-      }),
+  apps: userAppsSchema,
+  organization: zObjectId.openapi({
+    description: "Organization ObjectId",
   }),
+  email: z.string().email().optional().nullable().openapi({
+    example: "user@example.com",
+    description: "User email address",
+  }),
+  timezone: z.string().optional().openapi({
+    example: "Europe/Berlin",
+    description: "IANA timezone string",
+  }),
+  role: z.enum(["user", "admin", "patient", "onlyself"]).optional().openapi({
+    description: "Role assigned to the user",
+  }),
+};
+
+export const createUserSchema = {
+  body: z.object(createUserBodyShape),
 };
 
 export const createCurrentUserSchema = createUserSchema;
@@ -69,39 +71,39 @@ export const getCurrentUserSchema = {
   }),
 };
 
+export const updateUserBodyShape = {
+  name: z.string().optional().openapi({ description: "User full name" }),
+  timezone: z.string().optional().openapi({ description: "IANA timezone" }),
+  avatar: z.string().optional().openapi({ description: "Avatar URL" }),
+  meta: z
+    .object({})
+    .passthrough()
+    .optional()
+    .openapi({ description: "Additional metadata" }),
+  apps: userAppsSchema,
+  email: z
+    .string()
+    .email()
+    .nullable()
+    .optional()
+    .openapi({ description: "User email address" }),
+  role: z
+    .enum(["user", "admin", "patient", "onlyself"])
+    .optional()
+    .openapi({ description: "User role" }),
+  inviteCode: z
+    .string()
+    .nullable()
+    .optional()
+    .openapi({ description: "Invite code" }),
+  organization: zObjectId
+    .optional()
+    .openapi({ description: "Organization ObjectId" }),
+};
+
 export const updateUserSchema = {
   ...zUpdate("userId"),
-  body: zPatchBody({
-    name: z.string().optional().openapi({ description: "User full name" }),
-    timezone: z.string().optional().openapi({ description: "IANA timezone" }),
-    avatar: z.string().optional().openapi({ description: "Avatar URL" }),
-    meta: z
-      .object({})
-      .optional()
-      .openapi({ description: "Additional metadata" }),
-    category: z
-      .enum(["doctor", "nurse", "patient", "pharmacist", "relative"])
-      .optional()
-      .openapi({ description: "User category" }),
-    email: z
-      .string()
-      .email()
-      .nullable()
-      .optional()
-      .openapi({ description: "User email address" }),
-    role: z
-      .enum(["user", "admin", "patient", "onlyself"])
-      .optional()
-      .openapi({ description: "User role" }),
-    inviteCode: z
-      .string()
-      .nullable()
-      .optional()
-      .openapi({ description: "Invite code" }),
-    organization: zObjectId
-      .optional()
-      .openapi({ description: "Organization ObjectId" }),
-  }),
+  body: zPatchBody(updateUserBodyShape),
 };
 
 export const deleteUserSchema = zDelete("userId");

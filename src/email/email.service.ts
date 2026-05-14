@@ -54,11 +54,15 @@ const actionButton = ({
 </table>`;
 };
 
-interface SendEmailParams {
+export interface SendEmailParams {
   title?: string;
   body?: string;
   url?: string;
   domain?: string;
+  appBaseUrl?: string;
+  productName?: string;
+  companyName?: string;
+  accountUrl?: string;
   image?: string;
   email: string;
   actionButtonText?: string;
@@ -69,7 +73,11 @@ export const sendEmail = async ({
   title = "Kein Titel",
   body = "Kein Inhalt",
   url = "",
-  domain = "memo",
+  domain = "web",
+  appBaseUrl = `https://${domain}.wirewire.de`,
+  productName = domain,
+  companyName = "The Wire UG",
+  accountUrl = `${appBaseUrl}/account`,
   image,
   email,
   actionButtonText,
@@ -560,8 +568,8 @@ export const sendEmail = async ({
           <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td class="email-masthead">
-                <a href="https://${domain}.wirewire.de" class="f-fallback email-masthead_name">
-                 ${domain === "memo" ? "ANABOX smart" : "paperlesspaper"}
+                <a href="${appBaseUrl}" class="f-fallback email-masthead_name">
+                 ${productName}
               </a>
               </td>
             </tr>
@@ -580,7 +588,7 @@ export const sendEmail = async ({
                         ${actionButton({
                           link: urlStartsWithHttp(url)
                             ? url
-                            : `http://${domain}.wirewire.de${url}`,
+                            : `${appBaseUrl}${url}`,
                           text: actionButtonTextWithLanguage,
                         })}
                       </div>
@@ -595,8 +603,8 @@ export const sendEmail = async ({
                   <tr>
                     <td class="content-cell" align="center">
                       <p class="f-fallback sub align-center">
-                        ${domain === "web" ? "The Wire UG" : "wirewire GmbH"}
-                        <a href="http://${domain}.wirewire.de/account">Account</a>
+                        ${companyName}
+                        <a href="${accountUrl}">Account</a>
 
                         ${config.env !== "production" ? `<br/><br/>Environment: ${config.env}` : ""}
                       </p>

@@ -45,7 +45,6 @@ export const userRouteSpecs: RouteSpec[] = [
     handler: userController.createUser,
     summary: "Create a new user",
     description: "Creates a new user within the current organization.",
-    memoOnly: true,
   },
   {
     method: "get",
@@ -137,7 +136,9 @@ export const userRouteSpecs: RouteSpec[] = [
     responseSchema: updateUserResponseSchema,
     handler: userController.updateUser,
     summary: "Update a user by ID",
-    description: "Replaces a user’s full record with the provided data.",
+    isPrivate: true,
+    description:
+      "LEGACY: Replaces a user’s full record with the provided data. (Replaced by PATCH /:userId)",
   },
   {
     method: "patch",

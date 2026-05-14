@@ -30,16 +30,25 @@ export type RouteSpec = {
   summary: string;
   description?: string;
   privateDocs?: boolean;
-  memoOnly?: boolean;
+};
+
+export type BuildRouterAndDocsOptions = {
+  routeSpecs?: (specs: RouteSpec[]) => RouteSpec[];
+  includeInDocs?: (spec: RouteSpec) => boolean;
 };
 
 export default function buildAiRouterAndDocs(
   router: Router,
-  routeSpecs: any,
+  routeSpecs: RouteSpec[],
   basePath = "/",
   tags: string[] = [],
+  options: BuildRouterAndDocsOptions = {},
 ) {
-  routeSpecs.forEach((spec) => {
+  const effectiveRouteSpecs = options.routeSpecs
+    ? options.routeSpecs(routeSpecs)
+    : routeSpecs;
+
+  effectiveRouteSpecs.forEach((spec) => {
     const validate = spec.validate || [];
     const routeMiddleware =
       spec.validateWithRequestSchema ||
@@ -68,7 +77,7 @@ export default function buildAiRouterAndDocs(
       spec.responseSchema &&
       !hasRoleValidation(spec.validateWithRequestSchema || validate) &&
       spec.privateDocs !== true &&
-      spec.memoOnly !== true
+      (options.includeInDocs ? options.includeInDocs(spec) : true)
     ) {
       // collect all middleware fn names (falls back to '<anonymous>' if unnamed)
       const middlewareNames = (spec.validateWithRequestSchema || validate).map(
@@ -96,7 +105,7 @@ export default function buildAiRouterAndDocs(
         // (optionally) expose them as a custom extension instead:
         "x-middlewares": middlewareNames,
 
-        security: [{ [bearerAuth.name]: [] }, { [xApiKey.name]: [] }],
+        security: [{ [xApiKey.name]: [] }, { [bearerAuth.name]: [] }],
         responses: {
           200: {
             description: "Object with user data.",

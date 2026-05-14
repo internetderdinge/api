@@ -14,7 +14,6 @@ export interface IUser {
   inviteCode?: string;
   email?: string;
   role: (typeof roles)[number];
-  category: string;
   status?: string;
   meta?: Record<string, any>;
 }
@@ -27,7 +26,7 @@ export interface IUserModel extends Model<IUserDocument> {
   isEmailTaken(email: string, excludeUserId?: Types.ObjectId): Promise<boolean>;
 }
 
-const userSchema = new Schema<IUserDocument, IUserModel>(
+export const userSchema = new Schema<IUserDocument, IUserModel>(
   {
     name: { type: String, trim: true },
     avatar: { type: String },
@@ -37,7 +36,6 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
     inviteCode: { type: String },
     email: { type: String },
     role: { type: String, default: "patient" /* , enum: Object.keys(roles) */ },
-    category: { type: String, default: "patient" },
     status: { type: String },
     meta: { type: Schema.Types.Mixed },
   },
@@ -58,6 +56,12 @@ userSchema.virtual("organizationData", {
 // plugins
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
+
+export const extendUserSchema = (
+  definition: Parameters<typeof userSchema.add>[0],
+): void => {
+  userSchema.add(definition);
+};
 
 /**
  * Check if email is taken

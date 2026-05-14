@@ -148,6 +148,7 @@ export const iotdeviceRouteSpecs: RouteSpec[] = [
     requestSchema: apiStatusRequestSchema,
     responseSchema: apiStatusSchema,
     handler: getApiStatus,
+    privateDocs: true,
     summary: "Get API status by kind",
     description:
       "Retrieves the IoT API status information for a given status kind to monitor system health or performance. Can be accessed without authentication for uptime monitoring purposes.",

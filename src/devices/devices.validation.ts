@@ -112,53 +112,6 @@ export const createDeviceSchema = {
 };
 export const deleteDeviceSchema = zDelete("deviceId");
 export const getDeviceSchema = zGet("deviceId");
-export const ledLightSchema = {
-  params: z.object({
-    deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
-  }),
-  body: z
-    .object({
-      led: z.array(z.tuple([z.number().int(), z.number().int()])),
-      timeout: z.number().int(),
-    })
-    .openapi({
-      description: "LED light configuration for device",
-      example: {
-        led: [
-          [0, 0],
-          [1, 0],
-          [2, 0],
-          [3, 0],
-          [4, 0],
-          [5, 0],
-          [6, 0],
-          [7, 0],
-          [8, 0],
-          [9, 0],
-          [10, 0],
-          [11, 0],
-          [12, 0],
-          [13, 0],
-          [14, 0],
-          [15, 100],
-          [16, 100],
-          [17, 100],
-          [18, 100],
-          [19, 100],
-          [20, 100],
-          [21, 100],
-          [22, 0],
-          [23, 0],
-          [24, 0],
-          [25, 0],
-          [26, 0],
-          [27, 0],
-          [28, 0],
-        ],
-        timeout: 40,
-      },
-    }),
-};
 export const pingDeviceSchema = {
   params: z.object({
     deviceId: zObjectIdFor("deviceId").openapi({
