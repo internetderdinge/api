@@ -92,7 +92,9 @@ export const organizationsRouteSpecs: RouteSpec[] = [
     responseSchema: organizationResponseSchema,
     handler: updateOrganization,
     summary: "Update an organization by ID",
-    description: "Updates the details of a specific organization by its ID.",
+    privateDocs: true,
+    description:
+      "LEGACY: Updates the details of a specific organization by its ID.",
   },
   {
     method: "delete",

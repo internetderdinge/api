@@ -62,6 +62,7 @@ export const iotdeviceRouteSpecs: RouteSpec[] = [
     requestSchema: getEventsSchema,
     responseSchema: eventResponseSchema.array(),
     handler: getEvents,
+    privateDocs: true,
     summary: "Get events for a device",
     description: "Fetches event records for the specified device by its ID.",
   },
@@ -149,7 +150,7 @@ export const iotdeviceRouteSpecs: RouteSpec[] = [
     handler: getApiStatus,
     summary: "Get API status by kind",
     description:
-      "Retrieves the IoT API status information for a given status kind to monitor system health or performance. Can be accessed without authentication for monitoring purposes.",
+      "Retrieves the IoT API status information for a given status kind to monitor system health or performance. Can be accessed without authentication for uptime monitoring purposes.",
   },
   {
     method: "get",

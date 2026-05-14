@@ -92,9 +92,21 @@ export const devicesRouteSpecs: RouteSpec[] = [
     requestSchema: updateDeviceSchema,
     responseSchema: deviceResponseSchema,
     handler: devicesController.updateEntry,
+    privateDocs: true,
     summary: "Update a device",
     description:
-      "Modify the properties of an existing device identified by its ID.",
+      "LEGACY: Modify the properties of an existing device identified by its ID.",
+  },
+  {
+    method: "patch",
+    path: "/:deviceId",
+    validate: [auth("manageUsers"), validateDevice, validateOrganizationUpdate],
+    requestSchema: updateDeviceSchema,
+    responseSchema: deviceResponseSchema,
+    handler: devicesController.updateEntry,
+    summary: "Update a device",
+    description:
+      "Updates specific fields of an existing device identified by its ID.",
   },
   {
     method: "delete",

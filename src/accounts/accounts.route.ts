@@ -16,9 +16,9 @@ export const accountsRouteSpecs: RouteSpec[] = [
     validate: [auth("manageUsers")],
     requestSchema: accountsValidation.currentAccountSchema,
     responseSchema: accountResponseSchema,
-    privateDocs: true,
     handler: accountsController.current,
     summary: "Get the current account",
+    description: "Fetches the details of the currently authenticated account.",
   },
   {
     method: "post",
@@ -66,9 +66,10 @@ export const accountsRouteSpecs: RouteSpec[] = [
     validate: [auth("manageUsers")],
     requestSchema: accountsValidation.deleteCurrentSchema,
     responseSchema: accountResponseSchema,
-    privateDocs: true,
     handler: accountsController.deleteCurrent,
-    summary: "Delete the current account",
+    summary: "Delete the current user's account",
+    description:
+      "Permanently deletes the current user's account. Will not delete associated data. This action is irreversible.",
   },
   {
     method: "get",
@@ -78,6 +79,7 @@ export const accountsRouteSpecs: RouteSpec[] = [
     responseSchema: accountResponseSchema,
     handler: accountsController.getAccountById,
     summary: "Get an account by ID",
+    description: "Fetches the details of a single account by its ID.",
   },
   {
     method: "post",
@@ -87,7 +89,8 @@ export const accountsRouteSpecs: RouteSpec[] = [
     responseSchema: accountResponseSchema,
     privateDocs: true,
     handler: accountsController.updateEntry,
-    summary: "Create or replace an account by ID",
+    summary: "Update an account by ID",
+    description: "LEGACY: Updates an existing account with a specified ID.",
   },
   {
     method: "patch",
@@ -95,9 +98,10 @@ export const accountsRouteSpecs: RouteSpec[] = [
     validate: [auth("manageUsers"), validateParamsAccount],
     requestSchema: accountsValidation.updateAccountSchema,
     responseSchema: accountResponseSchema,
-    privateDocs: true,
     handler: accountsController.updateEntry,
     summary: "Update fields on an account by ID",
+    description:
+      "Updates specific fields of an existing account identified by its ID.",
   },
 ];
 
