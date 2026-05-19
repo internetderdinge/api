@@ -9,15 +9,8 @@ import {
   searchAdminCollections,
 } from "./adminSearch.service.js";
 
-const ADMIN_ROLE_CLAIM = "https://memo.wirewire.de/roles";
-
 type AuthRequest = Request & {
   auth?: Record<string, unknown>;
-};
-
-const hasAdminRole = (auth: Record<string, unknown> | undefined): boolean => {
-  const roles = auth?.[ADMIN_ROLE_CLAIM];
-  return Array.isArray(roles) && roles.includes("admin");
 };
 
 const readListQuery = (
@@ -42,13 +35,6 @@ const readListQuery = (
 
 export const searchAdmin = catchAsync(
   async (req: AuthRequest, res: Response) => {
-    if (!hasAdminRole(req.auth)) {
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        "User is not part of the admin group",
-      );
-    }
-
     const search = String(req.query.search || "").trim();
     const rawLimit = Number(req.query.limit);
     const limit = Number.isFinite(rawLimit)
@@ -61,26 +47,12 @@ export const searchAdmin = catchAsync(
 );
 
 export const getStats = catchAsync(async (req: AuthRequest, res: Response) => {
-  if (!hasAdminRole(req.auth)) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "User is not part of the admin group",
-    );
-  }
-
   const result = await getAdminStats();
   res.send(result);
 });
 
 export const getIotDevices = catchAsync(
   async (req: AuthRequest, res: Response) => {
-    if (!hasAdminRole(req.auth)) {
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        "User is not part of the admin group",
-      );
-    }
-
     const result = await getAdminIotDevices(readListQuery(req));
     res.send(result);
   },
@@ -88,13 +60,6 @@ export const getIotDevices = catchAsync(
 
 export const getDevices = catchAsync(
   async (req: AuthRequest, res: Response) => {
-    if (!hasAdminRole(req.auth)) {
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        "User is not part of the admin group",
-      );
-    }
-
     const result = await getAdminDevices(readListQuery(req));
     res.send(result);
   },

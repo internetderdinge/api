@@ -159,6 +159,10 @@ const updateEntry = catchAsync(
 const getEvents = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const device = await devicesService.getById(req.params.deviceId);
+    if (!device) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Device not found");
+    }
+
     const events = await iotDevicesService.getEvents({
       ...req.query,
       createdAt: device.createdAt,

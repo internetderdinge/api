@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import semver from "semver";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +18,25 @@ const readJson = (filePath) => {
 
 const writeJson = (filePath, data) => {
   fs.writeFileSync(filePath, `${JSON.stringify(data, null, 2)}\n`);
+};
+
+const publishPackage = () => {
+  const npmRegistry = "https://registry.npmjs.org/";
+  const npmUserConfig = path.join(repoRoot, ".npmrc");
+
+  execFileSync(
+    "npm",
+    ["publish", `--userconfig=${npmUserConfig}`, `--registry=${npmRegistry}`],
+    {
+      cwd: repoRoot,
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        npm_config_registry: npmRegistry,
+        npm_config_userconfig: npmUserConfig,
+      },
+    },
+  );
 };
 
 const resolveNextVersion = (current, input) => {
@@ -141,5 +160,5 @@ console.log(
 );
 
 if (shouldPublish) {
-  execSync("npm publish", { cwd: repoRoot, stdio: "inherit" });
+  publishPackage();
 }

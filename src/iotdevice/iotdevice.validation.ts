@@ -1,7 +1,7 @@
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import { objectId } from '../validations/custom.validation';
-import { zGet, zObjectId, zPagination } from '../utils/zValidations';
+import { zGet, zObjectId, zPagination, zTypeFilter } from '../utils/zValidations';
 
 extendZodWithOpenApi(z);
 
@@ -31,9 +31,17 @@ export const getEventsSchema = {
     deviceId: zObjectId.openapi({ description: 'Device ObjectId' }),
   }),
   query: z.object({
-    DateStart: z.string().openapi({ description: 'Start date (ISO‐string)', example: '2025-05-01T00:00:00Z' }),
-    DateEnd: z.string().openapi({ description: 'End date (ISO‐string)', example: '2025-05-31T23:59:59Z' }),
-    TypeFilter: z.string().openapi({ description: 'Optional type filter', example: '' }).optional().default(''),
+    DateStart: z
+      .string()
+      .datetime()
+      .openapi({ description: 'Start date (ISO‐string)', example: '2025-05-01T00:00:00Z' })
+      .optional(),
+    DateEnd: z
+      .string()
+      .datetime()
+      .openapi({ description: 'End date (ISO‐string)', example: '2025-05-31T23:59:59Z' })
+      .optional(),
+    TypeFilter: zTypeFilter.default(''),
   }),
 };
 export const updateEntrySchema = {};

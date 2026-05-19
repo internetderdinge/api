@@ -1,6 +1,6 @@
 {
   "name": "@internetderdinge/api",
-  "version": "1.229.32",
+  "version": "1.229.37",
   "description": "Shared OpenIoT API modules",
   "main": "dist/src/index.js",
   "type": "module",
@@ -122,5 +122,8 @@
     "vitest": "^4.0.18",
     "zod": "^4.3.6"
   },
-  "gitHead": "9556e8e376045c1e532aded7ec7132818190fa91"
+  "gitHead": "9556e8e376045c1e532aded7ec7132818190fa91",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
 }

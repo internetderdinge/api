@@ -158,3 +158,11 @@ export const zDelete = (id: string) => ({
 export const zObjectId = zObjectIdFor();
 
 export const zDate = () => z.string().pipe(z.coerce.date());
+
+export const zTypeFilter = z
+  .string()
+  .openapi({
+    description: "Event type filter. Common values include activate and state; any other string is accepted.",
+    example: "activate",
+  })
+  .optional();

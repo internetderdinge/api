@@ -1,7 +1,9 @@
 import { Router } from "express";
-import buildRouterAndDocs, { type RouteSpec } from "../utils/buildRouterAndDocs.js";
+import buildRouterAndDocs, {
+  type RouteSpec,
+} from "../utils/buildRouterAndDocs.js";
 import auth from "../middlewares/auth.js";
-import { validateAdmin } from "../middlewares/validateAdmin.js";
+import { validateAdminOrSupport } from "../middlewares/validateAdminOrSupport.js";
 import {
   getDevices,
   getIotDevices,
@@ -25,7 +27,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
   {
     method: "get",
     path: "/stats",
-    validate: [auth("getUsers"), validateAdmin],
+    validate: [auth("getUsers"), validateAdminOrSupport],
     requestSchema: adminStatsSchema,
     responseSchema: adminStatsResponseSchema,
     handler: getStats,
@@ -35,7 +37,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
   {
     method: "get",
     path: "/search",
-    validate: [auth("getUsers"), validateAdmin],
+    validate: [auth("getUsers"), validateAdminOrSupport],
     requestSchema: adminSearchSchema,
     responseSchema: adminSearchResponseSchema,
     handler: searchAdmin,
@@ -46,7 +48,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
   {
     method: "get",
     path: "/iotDevices",
-    validate: [auth("getUsers"), validateAdmin],
+    validate: [auth("getUsers"), validateAdminOrSupport],
     requestSchema: adminIotDevicesSchema,
     responseSchema: adminIotDevicesResponseSchema,
     handler: getIotDevices,
@@ -57,7 +59,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
   {
     method: "get",
     path: "/devices",
-    validate: [auth("getUsers"), validateAdmin],
+    validate: [auth("getUsers"), validateAdminOrSupport],
     requestSchema: adminDevicesSchema,
     responseSchema: adminDevicesResponseSchema,
     handler: getDevices,

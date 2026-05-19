@@ -89,13 +89,11 @@ type AdminListQuery = {
 
 const IOT_DEVICES_CACHE_TTL_MS = 60_000;
 
-let iotDevicesCache:
-  | {
-      loadedAt: number;
-      devices: unknown[];
-      pending?: Promise<unknown[]>;
-    }
-  | null = null;
+let iotDevicesCache: {
+  loadedAt: number;
+  devices: unknown[];
+  pending?: Promise<unknown[]>;
+} | null = null;
 
 const getCachedIotDevices = async (): Promise<unknown[]> => {
   const now = Date.now();
@@ -112,9 +110,7 @@ const getCachedIotDevices = async (): Promise<unknown[]> => {
 
   const pending = Promise.resolve(
     iotDevicesService.getDeviceStatusList(undefined),
-  ).then(
-    (devices) => (Array.isArray(devices) ? devices : []),
-  );
+  ).then((devices) => (Array.isArray(devices) ? devices : []));
 
   iotDevicesCache = {
     loadedAt: now,

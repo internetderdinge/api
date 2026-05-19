@@ -39,12 +39,17 @@ const iotDataClient = new IoTDataPlaneClient({
  */
 export const getEvents = async (params: {
   DeviceId: string;
-  DateStart: string;
-  DateEnd: string;
+  DateStart?: string;
+  DateEnd?: string;
   TypeFilter?: string;
   createdAt?: string;
 }): Promise<any> => {
   const accessToken = await getAuth0Token();
+  // Keep the requested start date, but never query events before the device existed.
+  const dateStart =
+    params.createdAt && new Date(params.DateStart) < new Date(params.createdAt)
+      ? params.createdAt
+      : params.DateStart;
   try {
     const response: AxiosResponse = await axios.get(
       `${process.env.IOT_API_URL}getevent`,
@@ -52,11 +57,7 @@ export const getEvents = async (params: {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: {
           DeviceId: params.DeviceId,
-          DateStart: !params.createdAt
-            ? params.DateStart
-            : params.DateStart < params.createdAt
-              ? params.DateStart
-              : params.createdAt,
+          DateStart: dateStart,
           DateEnd: params.DateEnd,
           TypeFilter: params.TypeFilter,
         },

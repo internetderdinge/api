@@ -9,6 +9,7 @@ import {
   zUpdate,
   zDelete,
   zPagination,
+  zTypeFilter,
 } from "../utils/zValidations.js";
 
 extendZodWithOpenApi(z);
@@ -73,9 +74,9 @@ export const getEventsSchema = {
   }),
   query: z
     .object({
-      DateStart: z.string(),
-      DateEnd: z.string(),
-      TypeFilter: z.string().optional(),
+      DateStart: z.string().datetime().optional(),
+      DateEnd: z.string().datetime().optional(),
+      TypeFilter: zTypeFilter,
     })
     .openapi({ description: "Fetch device events in a time range" }),
 };
