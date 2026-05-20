@@ -172,13 +172,20 @@ export const queryDevicesSchema = {
   query: zPagination.query.extend({
     patient: zObjectIdFor("patient").optional(),
     organization: zObjectIdFor("organization").optional(),
+  }).refine(
+    (data) => data.patient || data.organization,
+    { message: "Either patient or organization is required" }
+  ).openapi({ 
+    description: "Query devices. Either patient or organization is required" 
   }),
 };
+
 export const subscriptionSchema = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
   }),
 };
+
 export const uploadSingleImageFromWebsiteSchema = {};
 export const updateDeviceSchema = {
   ...zUpdate("deviceId"),
