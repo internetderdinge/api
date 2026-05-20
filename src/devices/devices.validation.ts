@@ -169,15 +169,20 @@ export const registerDeviceSchema = {
 
 export const queryDevicesSchema = {
   ...zPagination,
-  query: zPagination.query.extend({
-    patient: zObjectIdFor("patient").optional(),
-    organization: zObjectIdFor("organization").optional(),
-  }).refine(
-    (data) => data.patient || data.organization,
-    { message: "Either patient or organization is required" }
-  ).openapi({ 
-    description: "Query devices. Either patient or organization is required" 
-  }),
+  query: zPagination.query
+    .extend({
+      patient: zObjectIdFor("patient").optional().openapi({
+        description:
+          "Patient ObjectId. Required if organization is not provided.",
+      }),
+      organization: zObjectIdFor("organization").optional().openapi({
+        description:
+          "Organization ObjectId. Required if patient is not provided.",
+      }),
+    })
+    .refine((data) => data.patient || data.organization, {
+      message: "Either patient or organization is required",
+    }),
 };
 
 export const subscriptionSchema = {

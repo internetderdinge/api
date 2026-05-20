@@ -60,7 +60,7 @@ export const devicesRouteSpecs: RouteSpec[] = [
     handler: devicesController.queryDevicesByUser,
     summary: "Query devices by user",
     description:
-      "Retrieve a paginated list of devices visible to the authenticated user.",
+      "Retrieve a paginated list of devices visible to the authenticated user. Either patient or organization is required.",
   },
   {
     method: "get",
