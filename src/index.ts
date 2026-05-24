@@ -26,6 +26,10 @@ export * from "../src/organizations/organizations.controller";
 export { default as organizationsService } from "../src/organizations/organizations.service";
 export { default as Organization } from "../src/organizations/organizations.model";
 export { default as devicesRoute } from "../src/devices/devices.route";
+export {
+  createDevicesRoute,
+  devicesRouteSpecs,
+} from "../src/devices/devices.route";
 export { default as devicesService } from "../src/devices/devices.service";
 export { default as Device } from "../src/devices/devices.model";
 export * from "../src/devices/devices.validation";

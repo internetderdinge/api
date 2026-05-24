@@ -34,6 +34,7 @@ import {
   validateOrganizationDelete,
   validateOrganizationUpdate,
 } from "../middlewares/validateAction.js";
+import type { BuildRouterAndDocsOptions } from "../utils/buildRouterAndDocs.js";
 
 export const devicesRouteSpecs: RouteSpec[] = [
   {
@@ -166,7 +167,14 @@ export const devicesRouteSpecs: RouteSpec[] = [
   },
 ];
 
-const router: Router = Router();
-buildRouterAndDocs(router, devicesRouteSpecs, "/devices", ["Devices"]);
+export function createDevicesRoute(
+  options: BuildRouterAndDocsOptions = {},
+): Router {
+  const router: Router = Router();
+  buildRouterAndDocs(router, devicesRouteSpecs, "/devices", ["Devices"], options);
+  return router;
+}
+
+const router = createDevicesRoute();
 
 export default router;

@@ -1,6 +1,6 @@
 {
   "name": "@internetderdinge/api",
-  "version": "1.229.39",
+  "version": "1.229.42",
   "description": "Shared OpenIoT API modules",
   "main": "dist/src/index.js",
   "type": "module",
@@ -14,7 +14,7 @@
     "yalc:publish": "yalc publish --push",
     "deps:versions": "node --input-type=module -e \"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url); const out = (name) => { const pkgPath = require.resolve(name + '/package.json'); const version = require(pkgPath).version; console.log(name + '@' + version + ' -> ' + pkgPath); }; out('zod'); out('@asteasolutions/zod-to-openapi');\"",
     "deploy:version": "node ./scripts/release-version.mjs",
-    "release:paperless": "node ./scripts/release-and-sync-paperless.mjs",
+    "release": "node ./scripts/release-and-sync-paperless.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

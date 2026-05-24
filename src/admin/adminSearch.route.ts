@@ -31,6 +31,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
     requestSchema: adminStatsSchema,
     responseSchema: adminStatsResponseSchema,
     handler: getStats,
+    privateDocs: true,
     summary: "Get admin stats",
     description: "Returns total counts for organizations, users, and devices.",
   },
@@ -42,6 +43,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
     responseSchema: adminSearchResponseSchema,
     handler: searchAdmin,
     summary: "Search organizations, users, and devices",
+    privateDocs: true,
     description:
       "Performs an admin-only global search over organizations, users, and devices.",
   },
@@ -52,6 +54,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
     requestSchema: adminIotDevicesSchema,
     responseSchema: adminIotDevicesResponseSchema,
     handler: getIotDevices,
+    privateDocs: true,
     summary: "List IoT devices",
     description:
       "Returns the IoT device status list used for admin device/order sync workflows.",
@@ -63,6 +66,7 @@ export const adminSearchRouteSpecs: RouteSpec[] = [
     requestSchema: adminDevicesSchema,
     responseSchema: adminDevicesResponseSchema,
     handler: getDevices,
+    privateDocs: true,
     summary: "List MongoDB devices",
     description:
       "Returns all device documents from MongoDB for admin sync workflows.",

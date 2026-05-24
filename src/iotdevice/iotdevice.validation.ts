@@ -9,9 +9,17 @@ export const getDevice = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: 'Device ObjectId' }),
   }),
-  body: z.object({
-    deviceId: z.array(zObjectId).openapi({ description: 'Array of device IDs' }),
-  }),
+  body: z
+    .object({
+      deviceId: z
+        .array(zObjectId)
+        .openapi({ description: 'Array of device IDs' }),
+    })
+    .openapi({
+      example: {
+        deviceId: ['682fd0d7d4a6325d9d45b86f'],
+      },
+    }),
 };
 export const iotDevicesSchema = {
   ...zPagination,
@@ -30,19 +38,33 @@ export const getEventsSchema = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: 'Device ObjectId' }),
   }),
-  query: z.object({
-    DateStart: z
-      .string()
-      .datetime()
-      .openapi({ description: 'Start date (ISO‐string)', example: '2025-05-01T00:00:00Z' })
-      .optional(),
-    DateEnd: z
-      .string()
-      .datetime()
-      .openapi({ description: 'End date (ISO‐string)', example: '2025-05-31T23:59:59Z' })
-      .optional(),
-    TypeFilter: zTypeFilter.default(''),
-  }),
+  query: z
+    .object({
+      DateStart: z
+        .string()
+        .datetime()
+        .openapi({
+          description: 'Start date (ISO‐string)',
+          example: '2026-05-01T00:00:00Z',
+        })
+        .optional(),
+      DateEnd: z
+        .string()
+        .datetime()
+        .openapi({
+          description: 'End date (ISO‐string)',
+          example: '2026-05-21T23:59:59Z',
+        })
+        .optional(),
+      TypeFilter: zTypeFilter.default(''),
+    })
+    .openapi({
+      example: {
+        DateStart: '2026-05-01T00:00:00Z',
+        DateEnd: '2026-05-21T23:59:59Z',
+        TypeFilter: 'state',
+      },
+    }),
 };
 export const updateEntrySchema = {};
 

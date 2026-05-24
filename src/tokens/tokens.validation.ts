@@ -3,9 +3,15 @@ import { z } from "zod";
 import { zGet, zDelete } from "../utils/zValidations.js";
 
 export const createTokenSchema = {
-  body: z.object({
-    name: z.string().openapi({ example: "my sample token" }),
-  }),
+  body: z
+    .object({
+      name: z.string().openapi({ example: "Admin integration token" }),
+    })
+    .openapi({
+      example: {
+        name: "Admin integration token",
+      },
+    }),
 };
 
 export const getTokenSchema = zGet("tokenId");

@@ -13,22 +13,36 @@ import {
 extendZodWithOpenApi(z);
 
 export const createAccountSchema = {
-  body: z.object({
-    name: z
-      .string()
-      .openapi({ example: "Sample Entry", description: "Name of the entry" })
-      .optional(),
-    medication: zObjectId.openapi({ description: "Medication ObjectId" }),
-    organization: zObjectId.openapi({ description: "Organization ObjectId" }),
-    patient: zObjectId.openapi({ description: "Patient ObjectId" }),
-    meta: z
-      .record(z.string(), z.any())
-      .openapi({
-        example: { key: "value" },
-        description: "Additional metadata for the entry",
-      })
-      .optional(),
-  }),
+  body: z
+    .object({
+      name: z
+        .string()
+        .openapi({ example: "Sample Entry", description: "Name of the entry" })
+        .optional(),
+      medication: zObjectId.openapi({ description: "Medication ObjectId" }),
+      organization: zObjectId.openapi({ description: "Organization ObjectId" }),
+      patient: zObjectId.openapi({ description: "Patient ObjectId" }),
+      meta: z
+        .record(z.string(), z.any())
+        .openapi({
+          example: { key: "value" },
+          description: "Additional metadata for the entry",
+        })
+        .optional(),
+    })
+    .openapi({
+      example: {
+        name: "Sample Entry",
+        medication: "682fd0d7d4a6325d9d45b871",
+        organization:
+          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID ||
+          "682fd0d7d4a6325d9d45b86e",
+        patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+        meta: {
+          source: "manual",
+        },
+      },
+    }),
 };
 
 export const getUsersSchema = zPagination;
@@ -67,21 +81,38 @@ export const updateAccountSchema = {
         (value) => (value === "" ? undefined : value),
         z.string().email().optional(),
       )
-      .openapi({ description: "User email address" }),
+      .openapi({
+        example: "jane.doe@example.com",
+        description: "User email address",
+      }),
     given_name: z
       .string()
       .optional()
-      .openapi({ example: "John", description: "Given name" }),
+      .openapi({ example: "Jane", description: "Given name" }),
     family_name: z
       .string()
       .optional()
       .openapi({ example: "Doe", description: "Family name" }),
-    debug: z.boolean().optional(),
-    demo: z.boolean().optional(),
+    debug: z.boolean().optional().openapi({ example: false }),
+    demo: z.boolean().optional().openapi({ example: false }),
     notification: z
       .record(z.string(), z.any())
       .optional()
-      .openapi({ description: "Notification settings object" }),
+      .openapi({
+        example: { email: true, push: false },
+        description: "Notification settings object",
+      }),
+  }).openapi({
+    example: {
+      language: "en",
+      email: "jane.doe@example.com",
+      given_name: "Jane",
+      family_name: "Doe",
+      notification: {
+        email: true,
+        push: false,
+      },
+    },
   }),
 };
 
@@ -104,11 +135,18 @@ export const currentAccountMfaEnrollSchema = {
 };
 
 export const setDeviceTokenSchema = {
-  body: z.object({
-    token: z
-      .string()
-      .openapi({ example: "device-token", description: "Device token to set" }),
-  }),
+  body: z
+    .object({
+      token: z.string().openapi({
+        example: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+        description: "Device token to set",
+      }),
+    })
+    .openapi({
+      example: {
+        token: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+      },
+    }),
 };
 
 export const getAvatarSchema = {};

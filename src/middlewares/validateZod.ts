@@ -10,6 +10,15 @@ interface Schema {
   params?: ZodObject<ZodRawShape>;
 }
 
+const createValidationError = (raw: unknown) =>
+  new ApiError(
+    httpStatus.BAD_REQUEST,
+    'Validation error',
+    undefined,
+    undefined,
+    raw,
+  );
+
 export const validateZod = (schema: Schema) => (req: Request, res: Response, next: NextFunction) => {
   try {
     schema.body ||= z.object({});
@@ -25,10 +34,7 @@ export const validateZod = (schema: Schema) => (req: Request, res: Response, nex
 
     // 2) if any failure, short-circuit
     if (!result.body.success || !result.query.success || !result.params.success) {
-      if (process.env.NODE_ENV === 'development') {
-        return res.status(400).send(result);
-      }
-      return next(new ApiError(httpStatus.BAD_REQUEST, 'Validation error'));
+      return next(createValidationError(result));
     }
 
     // 3) merge parsed data back in
@@ -39,15 +45,7 @@ export const validateZod = (schema: Schema) => (req: Request, res: Response, nex
     return next();
   } catch (err: any) {
     console.error('Zod validation error:', err);
-    return next(
-      new ApiError(
-        httpStatus.BAD_REQUEST,
-        'Validation error',
-        undefined,
-        undefined,
-        process.env.NODE_ENV === 'development' ? err : undefined,
-      ),
-    );
+    return next(createValidationError(err));
   }
 };
 

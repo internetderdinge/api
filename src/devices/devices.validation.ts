@@ -26,7 +26,23 @@ export const createEntrySchema = {
       paper: zObjectId.optional().nullable(),
       date: z.string().datetime().optional(),
     })
-    .openapi({ description: "Create a new device entry" }),
+    .openapi({
+      description: "Create a new device entry",
+      example: {
+        name: "Kitchen Display",
+        deviceId: "nrf-352656106701140",
+        kind: "paper-display",
+        organization:
+          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID ||
+          "682fd0d7d4a6325d9d45b86e",
+        patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+        paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || null,
+        date: "2026-05-21T09:30:00.000Z",
+        meta: {
+          room: "kitchen",
+        },
+      },
+    }),
 };
 
 export const getUsersSchema = {
@@ -63,7 +79,19 @@ export const updateEntrySchema = {
     lut: z.string().optional(),
     sleepTime: z.string().optional(),
     clearScreen: z.boolean().optional(),
-  }).openapi({ description: "Fields to update on a device entry" }),
+  }).openapi({
+    description: "Fields to update on a device entry",
+    example: {
+      name: "Kitchen Display",
+      kind: "paper-display",
+      meta: {
+        room: "kitchen",
+      },
+      alarmEnable: 1,
+      takeOffsetTime: 15,
+      clearScreen: false,
+    },
+  }),
 };
 
 export const getEventsSchema = {
@@ -88,28 +116,45 @@ export const createCustomerPortalSessionSchema = {
   params: z.object({
     deviceId: zObjectId.openapi({ description: "Device ObjectId" }),
   }),
-  body: z.object({
-    domain: z.string().url().openapi({
-      description: "Domain for return URL",
-      example: "https://web.wirewire.de",
+  body: z
+    .object({
+      domain: z.string().url().openapi({
+        description: "Domain for return URL",
+        example: "https://web.wirewire.de",
+      }),
+    })
+    .openapi({
+      example: {
+        domain: "https://web.wirewire.de",
+      },
     }),
-  }),
 };
 export const createDeviceSchema = {
-  body: z.object({
-    kind: z.string().optional(),
-    patient: zObjectIdFor("patient")
-      .optional()
-      .nullable()
-      .openapi({ description: "Patient ObjectId", example: null }),
-    paper: zObjectIdFor("paper")
-      .optional()
-      .nullable()
-      .openapi({ description: "Paper ObjectId", example: null }),
-    organization: zObjectIdFor("organization").openapi({
-      description: "Organization ObjectId",
+  body: z
+    .object({
+      kind: z.string().optional().openapi({ example: "paper-display" }),
+      patient: zObjectIdFor("patient")
+        .optional()
+        .nullable()
+        .openapi({ description: "Patient ObjectId", example: null }),
+      paper: zObjectIdFor("paper")
+        .optional()
+        .nullable()
+        .openapi({ description: "Paper ObjectId", example: null }),
+      organization: zObjectIdFor("organization").openapi({
+        description: "Organization ObjectId",
+      }),
+    })
+    .openapi({
+      example: {
+        kind: "paper-display",
+        patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+        paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || null,
+        organization:
+          process.env.SCHEMA_EXAMPLE_ORGANIZATION_ID ||
+          "682fd0d7d4a6325d9d45b86e",
+      },
     }),
-  }),
 };
 export const deleteDeviceSchema = zDelete("deviceId");
 export const getDeviceSchema = zGet("deviceId");
@@ -195,16 +240,40 @@ export const uploadSingleImageFromWebsiteSchema = {};
 export const updateDeviceSchema = {
   ...zUpdate("deviceId"),
   body: zPatchBody({
-    intake: z.record(z.string(), z.any()).optional(),
-    meta: z.record(z.string(), z.any()).optional(),
+    intake: z
+      .record(z.string(), z.any())
+      .optional()
+      .openapi({ example: { morning: "08:00", evening: "20:00" } }),
+    meta: z
+      .record(z.string(), z.any())
+      .optional()
+      .openapi({ example: { room: "kitchen" } }),
     organization: zObjectId.optional(),
     patient: zObjectId.optional().nullable(),
     paper: zObjectId.optional().nullable(),
-    kind: z.string().optional(),
-    deviceId: z.string().optional(),
-    alarmEnable: z.number().int().optional(),
-    takeOffsetTime: z.number().int().optional(),
-    iotDevice: z.record(z.string(), z.any()).optional(),
-    payment: z.record(z.string(), z.any()).optional(),
+    kind: z.string().optional().openapi({ example: "paper-display" }),
+    deviceId: z.string().optional().openapi({ example: "nrf-352656106701140" }),
+    alarmEnable: z.number().int().optional().openapi({ example: 1 }),
+    takeOffsetTime: z.number().int().optional().openapi({ example: 15 }),
+    iotDevice: z
+      .record(z.string(), z.any())
+      .optional()
+      .openapi({ example: { firmwareVersion: "1.2.3" } }),
+    payment: z
+      .record(z.string(), z.any())
+      .optional()
+      .openapi({ example: { status: "active" } }),
+  }).openapi({
+    example: {
+      kind: "paper-display",
+      deviceId: "nrf-352656106701140",
+      patient: process.env.SCHEMA_EXAMPLE_USER_ID || "682fd0d7d4a6325d9d45b86d",
+      paper: process.env.SCHEMA_EXAMPLE_PAPER_ID || null,
+      meta: {
+        room: "kitchen",
+      },
+      alarmEnable: 1,
+      takeOffsetTime: 15,
+    },
   }),
 };

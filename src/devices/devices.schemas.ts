@@ -2,29 +2,64 @@ import { z } from "zod";
 import { zObjectId } from "../utils/zValidations.js";
 
 export const deviceResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  serialNumber: z.string().optional(),
-  status: z.enum(["online", "offline", "error"]),
-  createdAt: z.string(), // ISO timestamp
-  updatedAt: z.string(), // ISO timestamp
-  // ...other device fields...
+  id: z.string().openapi({ example: "682fd0d7d4a6325d9d45b86f" }),
+  name: z.string().openapi({ example: "Kitchen Display" }),
+  serialNumber: z.string().optional().openapi({ example: "nrf-352656106701140" }),
+  status: z.enum(["online", "offline", "error"]).openapi({ example: "online" }),
+  createdAt: z
+    .string()
+    .datetime()
+    .openapi({ example: "2026-05-21T09:30:00.000Z" }),
+  updatedAt: z
+    .string()
+    .datetime()
+    .openapi({ example: "2026-05-21T10:15:00.000Z" }),
+}).openapi({
+  example: {
+    id: "682fd0d7d4a6325d9d45b86f",
+    name: "Kitchen Display",
+    serialNumber: "nrf-352656106701140",
+    status: "online",
+    createdAt: "2026-05-21T09:30:00.000Z",
+    updatedAt: "2026-05-21T10:15:00.000Z",
+  },
 });
 
 export const devicesResponseSchema = deviceResponseSchema.array();
 
 export const eventResponseSchema = z.object({
-  id: z.string(),
-  deviceId: z.string(),
-  type: z.string(),
-  payload: z.record(z.string(), z.any()),
-  timestamp: z.string(), // ISO timestamp
-  // ...other event fields...
+  id: z.string().openapi({ example: "evt_01HX0000000000000000000000" }),
+  deviceId: z.string().openapi({ example: "682fd0d7d4a6325d9d45b86f" }),
+  type: z.string().openapi({ example: "state" }),
+  payload: z
+    .record(z.string(), z.any())
+    .openapi({ example: { battery: 87, online: true } }),
+  timestamp: z
+    .string()
+    .datetime()
+    .openapi({ example: "2026-05-21T10:15:00.000Z" }),
+}).openapi({
+  example: {
+    id: "evt_01HX0000000000000000000000",
+    deviceId: "682fd0d7d4a6325d9d45b86f",
+    type: "state",
+    payload: {
+      battery: 87,
+      online: true,
+    },
+    timestamp: "2026-05-21T10:15:00.000Z",
+  },
 });
 
 export const genericResponseSchema = z
   .record(z.string(), z.any())
-  .openapi({ description: "Generic response payload" });
+  .openapi({
+    description: "Generic response payload",
+    example: {
+      success: true,
+      message: "Operation completed successfully",
+    },
+  });
 
 export const imageResponseSchema = z.object({
   uuid: z.string(),
@@ -93,4 +128,10 @@ export const resetResponseSchema = z.object({
     example: true,
     description: "Indicates if the reset operation was successful",
   }),
+}).openapi({
+  example: {
+    message:
+      "Reset all Variables and Memory and reboot Device: nrf-352656106701140",
+    success: true,
+  },
 });
