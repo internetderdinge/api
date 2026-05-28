@@ -8,6 +8,7 @@ const organizationSearchEntrySchema = z.object({
 
 const userSearchEntrySchema = z.object({
   id: z.string(),
+  owner: z.string().optional(),
   name: z.string().optional(),
   email: z.string().optional(),
   role: z.string().optional(),

@@ -18,6 +18,7 @@ type OrganizationResult = {
 
 type UserResult = {
   id: string;
+  owner?: string;
   name?: string;
   email?: string;
   role?: string;
@@ -509,6 +510,7 @@ const buildUserResult = (
       organizationData?.name as string,
     ]),
     id: String(user._id),
+    owner: user.owner as string | undefined,
     name: user.name as string | undefined,
     email: (user.email as string | undefined) || metadataEmail,
     role: user.role as string | undefined,
@@ -678,6 +680,7 @@ const searchUsersInAuth0 = async (
 
         return {
           id: `auth0:${userId}`,
+          owner: userId,
           name,
           email: finalEmail,
           role: "auth0",
@@ -770,7 +773,7 @@ export const searchAdminCollections = async ({
       .limit(limit * 2)
       .lean<Array<Record<string, unknown>>>(),
     User.find(userFilter)
-      .select("_id name email role organization meta")
+      .select("_id name email role organization owner meta")
       .populate("organizationData", "_id name kind")
       .limit(limit * 2)
       .lean<Array<Record<string, unknown>>>(),
