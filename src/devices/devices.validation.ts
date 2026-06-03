@@ -102,8 +102,8 @@ export const getEventsSchema = {
   }),
   query: z
     .object({
-      DateStart: z.string().datetime().optional(),
-      DateEnd: z.string().datetime().optional(),
+      DateStart: z.string().datetime({ offset: true }).optional(),
+      DateEnd: z.string().datetime({ offset: true }).optional(),
       TypeFilter: zTypeFilter,
     })
     .openapi({ description: "Fetch device events in a time range" }),

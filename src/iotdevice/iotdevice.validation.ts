@@ -42,7 +42,7 @@ export const getEventsSchema = {
     .object({
       DateStart: z
         .string()
-        .datetime()
+        .datetime({ offset: true })
         .openapi({
           description: 'Start date (ISO‐string)',
           example: '2026-05-01T00:00:00Z',
@@ -50,7 +50,7 @@ export const getEventsSchema = {
         .optional(),
       DateEnd: z
         .string()
-        .datetime()
+        .datetime({ offset: true })
         .openapi({
           description: 'End date (ISO‐string)',
           example: '2026-05-21T23:59:59Z',
