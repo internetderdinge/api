@@ -56,6 +56,7 @@ const actionButton = ({
 
 export interface SendEmailParams {
   title?: string;
+  subject?: string;
   body?: string;
   url?: string;
   domain?: string;
@@ -71,6 +72,7 @@ export interface SendEmailParams {
 
 export const sendEmail = async ({
   title = "Kein Titel",
+  subject,
   body = "Kein Inhalt",
   url = "",
   domain = "web",
@@ -628,7 +630,7 @@ export const sendEmail = async ({
         },
         Subject: {
           Charset: "UTF-8",
-          Data: `${title} - Memo App`,
+          Data: `${subject || title}`,
         },
       },
     },
